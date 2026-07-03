@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { EXPENSE_CATEGORIES, CATEGORIES, guessCategory } from "@/lib/categories";
+import { Icon } from "@/components/icons";
 import type { CategoryKey } from "@/lib/types";
 
 export function AddTransactionForm() {
@@ -78,20 +79,20 @@ export function AddTransactionForm() {
             <button
               type="button"
               onClick={() => setType("gasto")}
-              className={`flex-1 rounded-full py-2 text-sm font-semibold ${
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-sm font-medium ${
                 type === "gasto" ? "btn-primary" : "btn-glass"
               }`}
             >
-              💸 Gasto
+              <Icon name="arrow-down" size={16} /> Gasto
             </button>
             <button
               type="button"
               onClick={() => setType("receita")}
-              className={`flex-1 rounded-full py-2 text-sm font-semibold ${
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-sm font-medium ${
                 type === "receita" ? "btn-primary" : "btn-glass"
               }`}
             >
-              💰 Receita
+              <Icon name="arrow-up" size={16} /> Receita
             </button>
           </div>
 
@@ -128,7 +129,7 @@ export function AddTransactionForm() {
             >
               {EXPENSE_CATEGORIES.map((c) => (
                 <option key={c.key} value={c.key} className="bg-[var(--select-bg)] text-[color:var(--text)]">
-                  {c.emoji} {c.label}
+                  {c.label}
                 </option>
               ))}
             </select>

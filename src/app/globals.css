@@ -2,63 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== TEMA ESCURO (padrão) ===== */
+/* ===== TEMA ESCURO (padrão) — Apple dark ===== */
 :root,
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg-base: #0a0912;
-  --bg-radial: #1a1330;
-  --text: #f4f2fb;
-  --text-dim: rgba(244, 242, 251, 0.62);
+  --bg-base: #000000;
+  --bg-soft: #0a0a0c;
+  --text: #f5f5f7;
+  --text-dim: rgba(235, 235, 245, 0.6);
 
-  --glass-from: rgba(255, 255, 255, 0.12);
-  --glass-to: rgba(255, 255, 255, 0.04);
-  --glass-border: rgba(255, 255, 255, 0.14);
-  --glass-highlight: rgba(255, 255, 255, 0.22);
-  --glass-spec: rgba(255, 255, 255, 0.16);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-  --glass-hover-from: rgba(255, 255, 255, 0.2);
-  --glass-hover-to: rgba(255, 255, 255, 0.08);
-  --glass-strong-from: rgba(255, 255, 255, 0.18);
-  --glass-strong-to: rgba(255, 255, 255, 0.07);
+  --accent: #0a84ff;
+  --accent-press: #409cff;
+
+  --card-bg: rgba(28, 28, 30, 0.72);
+  --card-border: rgba(255, 255, 255, 0.09);
+  --card-shadow: 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 12px 40px rgba(0, 0, 0, 0.55);
+  --card-hover: rgba(44, 44, 46, 0.82);
+
+  --nav-bg: rgba(28, 28, 30, 0.7);
 
   --input-bg: rgba(255, 255, 255, 0.06);
-  --surface-1: rgba(255, 255, 255, 0.1);
-  --surface-2: rgba(255, 255, 255, 0.05);
-  --hairline: rgba(255, 255, 255, 0.08);
-  --select-bg: #140f26;
-  --tooltip-bg: rgba(20, 15, 38, 0.9);
-  --scrollbar: rgba(255, 255, 255, 0.15);
-  --blob-opacity: 0.55;
+  --surface-1: rgba(255, 255, 255, 0.08);
+  --surface-2: rgba(255, 255, 255, 0.045);
+  --hairline: rgba(255, 255, 255, 0.1);
+  --select-bg: #1c1c1e;
+  --tooltip-bg: rgba(28, 28, 30, 0.96);
+  --scrollbar: rgba(255, 255, 255, 0.18);
+  --tint: rgba(10, 132, 255, 0.06);
 }
 
-/* ===== TEMA CLARO ===== */
+/* ===== TEMA CLARO — apple.com ===== */
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg-base: #eceaf6;
-  --bg-radial: #f7f5ff;
-  --text: #1c1330;
-  --text-dim: rgba(28, 19, 48, 0.6);
+  --bg-base: #f5f5f7;
+  --bg-soft: #fbfbfd;
+  --text: #1d1d1f;
+  --text-dim: #6e6e73;
 
-  --glass-from: rgba(255, 255, 255, 0.78);
-  --glass-to: rgba(255, 255, 255, 0.42);
-  --glass-border: rgba(255, 255, 255, 0.9);
-  --glass-highlight: rgba(255, 255, 255, 0.95);
-  --glass-spec: rgba(255, 255, 255, 0.7);
-  --glass-shadow: 0 10px 30px rgba(70, 60, 110, 0.15);
-  --glass-hover-from: rgba(255, 255, 255, 0.92);
-  --glass-hover-to: rgba(255, 255, 255, 0.62);
-  --glass-strong-from: rgba(255, 255, 255, 0.88);
-  --glass-strong-to: rgba(255, 255, 255, 0.6);
+  --accent: #0071e3;
+  --accent-press: #0077ed;
 
-  --input-bg: rgba(255, 255, 255, 0.6);
-  --surface-1: rgba(28, 19, 48, 0.06);
-  --surface-2: rgba(28, 19, 48, 0.035);
-  --hairline: rgba(28, 19, 48, 0.08);
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(0, 0, 0, 0.06);
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.04),
+    0 10px 30px rgba(0, 0, 0, 0.06);
+  --card-hover: rgba(255, 255, 255, 0.95);
+
+  --nav-bg: rgba(255, 255, 255, 0.72);
+
+  --input-bg: rgba(0, 0, 0, 0.03);
+  --surface-1: rgba(0, 0, 0, 0.05);
+  --surface-2: rgba(0, 0, 0, 0.03);
+  --hairline: rgba(0, 0, 0, 0.08);
   --select-bg: #ffffff;
-  --tooltip-bg: rgba(255, 255, 255, 0.95);
-  --scrollbar: rgba(28, 19, 48, 0.2);
-  --blob-opacity: 0.32;
+  --tooltip-bg: rgba(255, 255, 255, 0.98);
+  --scrollbar: rgba(0, 0, 0, 0.2);
+  --tint: rgba(0, 113, 227, 0.05);
 }
 
 * {
@@ -71,136 +71,94 @@ body {
   margin: 0;
   color: var(--text);
   background: var(--bg-base);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
-    Roboto, sans-serif;
+  font-family: "SF Pro Display", "SF Pro Text", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.35s ease, color 0.35s ease;
+  text-rendering: optimizeLegibility;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-/* ===== Fundo com gradiente "mesh" animado ===== */
+/* Tipografia estilo Apple: títulos com tracking negativo */
+@layer base {
+  h1 {
+    letter-spacing: -0.022em;
+  }
+  h2,
+  h3 {
+    letter-spacing: -0.014em;
+  }
+}
+
+/* ===== Fundo limpo (apple.com) — leve véu, sem blobs ===== */
 .app-bg {
   position: fixed;
   inset: 0;
   z-index: -1;
-  overflow: hidden;
-  background: radial-gradient(circle at 50% 0%, var(--bg-radial) 0%, var(--bg-base) 60%);
-}
-.app-bg::before,
-.app-bg::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  opacity: var(--blob-opacity);
-}
-.app-bg::before {
-  width: 45vw;
-  height: 45vw;
-  left: -8vw;
-  top: -6vw;
-  background: radial-gradient(circle, #7c5cff, transparent 70%);
-  animation: floaty 12s ease-in-out infinite;
-}
-.app-bg::after {
-  width: 40vw;
-  height: 40vw;
-  right: -6vw;
-  bottom: -8vw;
-  background: radial-gradient(circle, #38bdf8, transparent 70%);
-  animation: floaty 14s ease-in-out infinite reverse;
+  background: radial-gradient(
+      120% 80% at 50% -10%,
+      var(--tint) 0%,
+      transparent 55%
+    ),
+    var(--bg-base);
 }
 .app-bg .blob-3 {
-  position: absolute;
-  width: 30vw;
-  height: 30vw;
-  right: 20vw;
-  top: 30vh;
-  border-radius: 50%;
-  filter: blur(90px);
-  opacity: calc(var(--blob-opacity) * 0.65);
-  background: radial-gradient(circle, #fb7185, transparent 70%);
-  animation: floaty 16s ease-in-out infinite;
+  display: none;
 }
 
-@keyframes floaty {
-  0%,
-  100% {
-    transform: translateY(0) translateX(0);
-  }
-  50% {
-    transform: translateY(-30px) translateX(20px);
-  }
-}
-
-/* ===== Superficie de vidro (Liquid Glass) ===== */
 @layer components {
+  /* Card limpo e sóbrio */
   .glass {
-    position: relative;
-    background: linear-gradient(135deg, var(--glass-from), var(--glass-to));
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
-    border-radius: 1.75rem;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+    border-radius: 1.25rem;
   }
-  .glass::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(180deg, var(--glass-spec) 0%, transparent 30%);
-    pointer-events: none;
-  }
-
   .glass-strong {
-    background: linear-gradient(
-      135deg,
-      var(--glass-strong-from),
-      var(--glass-strong-to)
-    );
+    background: var(--card-hover);
   }
 
   .btn-glass {
-    @apply glass rounded-full px-5 py-2.5 text-sm font-semibold transition;
+    @apply rounded-full px-5 py-2.5 text-sm font-medium transition;
+    background: var(--surface-1);
+    color: var(--text);
+    border: 1px solid var(--card-border);
     cursor: pointer;
   }
   .btn-glass:hover {
-    background: linear-gradient(
-      135deg,
-      var(--glass-hover-from),
-      var(--glass-hover-to)
-    );
+    background: var(--surface-2);
   }
+
   .btn-primary {
-    @apply rounded-full px-5 py-2.5 text-sm font-semibold text-white transition;
-    background: linear-gradient(135deg, #7c5cff, #a78bfa);
-    box-shadow: 0 8px 24px rgba(124, 92, 255, 0.45);
+    @apply rounded-full px-5 py-2.5 text-sm font-medium text-white transition;
+    background: var(--accent);
     cursor: pointer;
   }
   .btn-primary:hover {
-    filter: brightness(1.08);
+    background: var(--accent-press);
   }
 
   .input-glass {
-    @apply glass rounded-2xl px-4 py-3 text-sm w-full outline-none;
+    @apply rounded-xl px-4 py-3 text-sm w-full outline-none transition;
     background: var(--input-bg);
     color: var(--text);
+    border: 1px solid var(--card-border);
   }
   .input-glass::placeholder {
     color: var(--text-dim);
   }
   .input-glass:focus {
-    border-color: rgba(167, 139, 250, 0.6);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--tint);
   }
 
-  /* superficies semanticas que se adaptam ao tema */
   .fill-1 {
     background: var(--surface-1);
   }
   .fill-2 {
     background: var(--surface-2);
   }
-  /* link discreto que escurece/clareia no hover conforme o tema */
   .link-dim {
     color: var(--text-dim);
     transition: color 0.2s ease;
@@ -214,7 +172,65 @@ body {
   color: var(--text-dim);
 }
 
-/* scrollbar discreta */
+.animate-fadeup {
+  animation: fadeup 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes fadeup {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Transição de página (estilo Apple) ===== */
+.page-enter {
+  animation: pageEnter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes pageEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.99);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Cascata suave dos blocos principais da tela */
+.page-enter main > * {
+  animation: fadeup 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.page-enter main > *:nth-child(1) { animation-delay: 0.02s; }
+.page-enter main > *:nth-child(2) { animation-delay: 0.07s; }
+.page-enter main > *:nth-child(3) { animation-delay: 0.12s; }
+.page-enter main > *:nth-child(4) { animation-delay: 0.17s; }
+.page-enter main > *:nth-child(5) { animation-delay: 0.22s; }
+.page-enter main > *:nth-child(6) { animation-delay: 0.27s; }
+.page-enter main > *:nth-child(n + 7) { animation-delay: 0.3s; }
+
+/* Toque de vida nos cards ao passar o mouse */
+.glass {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  .page-enter,
+  .page-enter main > *,
+  .animate-fadeup {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -224,7 +240,7 @@ body {
   border-radius: 8px;
 }
 
-/* Recharts: cor do texto e das linhas de grade seguem o tema */
+/* Recharts */
 .recharts-text {
   fill: var(--text-dim);
   font-size: 12px;

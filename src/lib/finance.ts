@@ -26,11 +26,12 @@ export interface FinanceSummary {
 export function summarize(
   transactions: Transaction[],
   budgets: Budget[],
-  monthKey = currentMonthKey()
+  monthKey = currentMonthKey(),
+  monthlySalary = 0
 ): FinanceSummary {
   const month = transactions.filter((t) => inMonth(t, monthKey));
 
-  let income = 0;
+  let income = monthlySalary; // salário fixo cadastrado em Ajustes
   let expenses = 0;
   const catMap = new Map<CategoryKey, number>();
 

@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import Papa from "papaparse";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { guessCategory, categoryMeta, BRL, EXPENSE_CATEGORIES, CATEGORIES } from "@/lib/categories";
+import { parseAmount, parseDate } from "@/lib/parse";
+import { parsePdfTransactions } from "@/lib/pdf";
+import { CategoryIcon, Icon } from "@/components/icons";
 import type { CategoryKey, Transaction } from "@/lib/types";
 
 type Draft = Omit<Transaction, "id">;
@@ -18,37 +21,6 @@ function norm(s: string) {
     .trim();
 }
 
-// Converte "1.234,56" ou "-1234.56" ou "R$ 100,00" em number
-function parseAmount(raw: string): number | null {
-  if (!raw) return null;
-  let s = raw.replace(/[R$\s]/g, "").trim();
-  if (!s) return null;
-  const neg = /^-/.test(s) || /\(.*\)/.test(s);
-  s = s.replace(/[()]/g, "").replace(/^-/, "");
-  // formato BR: 1.234,56  -> tira pontos, troca virgula por ponto
-  if (s.includes(",")) {
-    s = s.replace(/\./g, "").replace(",", ".");
-  }
-  const n = parseFloat(s);
-  if (isNaN(n)) return null;
-  return neg ? -n : n;
-}
-
-function parseDate(raw: string): string | null {
-  if (!raw) return null;
-  const s = raw.trim();
-  // dd/mm/yyyy
-  let m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
-  if (m) return `${m[3]}-${m[2]}-${m[1]}`;
-  // yyyy-mm-dd
-  m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
-  // dd/mm/yy
-  m = s.match(/^(\d{2})\/(\d{2})\/(\d{2})$/);
-  if (m) return `20${m[3]}-${m[2]}-${m[1]}`;
-  return null;
-}
-
 const DATE_KEYS = ["data", "date", "data da compra", "data lancamento", "data do lancamento"];
 const DESC_KEYS = ["descricao", "description", "titulo", "title", "estabelecimento", "historico", "lancamento"];
 const AMOUNT_KEYS = ["valor", "amount", "value", "montante", "valor (r$)"];
@@ -60,11 +32,50 @@ export function ImportClient() {
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [parsing, setParsing] = useState(false);
   const [done, setDone] = useState(false);
 
-  function handleFile(file: File) {
+  function onFile(file: File) {
     setError(null);
     setDone(false);
+    setDrafts([]);
+    const isPdf =
+      file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+    if (isPdf) handlePdf(file);
+    else handleCsv(file);
+  }
+
+  async function handlePdf(file: File) {
+    setParsing(true);
+    try {
+      const { drafts: raw, linesRead } = await parsePdfTransactions(file);
+      if (!raw.length) {
+        setError(
+          `Li ${linesRead} linhas do PDF, mas não reconheci transações (data + valor). ` +
+            "Alguns PDFs são imagem escaneada e não têm texto — nesse caso, tente o CSV."
+        );
+        return;
+      }
+      setDrafts(
+        raw.map((d) => ({
+          date: d.date,
+          description: d.description,
+          amount: d.amount,
+          category: d.amount > 0 ? "receita" : guessCategory(d.description),
+          source: "pdf" as const,
+          account,
+        }))
+      );
+    } catch (e) {
+      setError(
+        "Erro ao ler o PDF: " + (e instanceof Error ? e.message : "desconhecido")
+      );
+    } finally {
+      setParsing(false);
+    }
+  }
+
+  function handleCsv(file: File) {
     Papa.parse<Record<string, string>>(file, {
       header: true,
       skipEmptyLines: true,
@@ -168,22 +179,28 @@ export function ImportClient() {
           <option className="bg-[var(--select-bg)] text-[color:var(--text)]">Outro</option>
         </select>
 
-        <label className="btn-primary inline-block cursor-pointer">
-          Selecionar arquivo CSV
+        <label
+          className={`btn-primary inline-flex cursor-pointer items-center gap-2 ${
+            parsing ? "pointer-events-none opacity-70" : ""
+          }`}
+        >
+          <Icon name="file" size={16} />
+          {parsing ? "Lendo arquivo…" : "Selecionar arquivo (CSV ou PDF)"}
           <input
             type="file"
-            accept=".csv,text/csv"
+            accept=".csv,text/csv,.pdf,application/pdf"
             className="hidden"
             onChange={(e) => {
               const f = e.target.files?.[0];
-              if (f) handleFile(f);
+              if (f) onFile(f);
+              e.target.value = "";
             }}
           />
         </label>
         <p className="text-dim mt-3 text-xs">
-          Baixe o extrato/fatura em <strong>CSV</strong> no app do{" "}
-          {account}. O sistema detecta as colunas de data, descrição e valor
-          automaticamente e sugere a categoria.
+          Aceita <strong>CSV</strong> (Nubank) e <strong>PDF</strong> (Sicoob e
+          outros). O sistema lê data, descrição e valor e sugere a categoria de
+          cada lançamento — você revisa antes de salvar.
         </p>
       </div>
 
@@ -193,8 +210,9 @@ export function ImportClient() {
         </div>
       )}
       {done && (
-        <div className="glass border-accent-green/40 p-4 text-sm text-accent-green">
-          ✓ Transações importadas com sucesso!
+        <div className="glass flex items-center gap-2 p-4 text-sm text-accent-green">
+          <Icon name="check" size={17} strokeWidth={2} />
+          Transações importadas com sucesso!
         </div>
       )}
 
@@ -217,7 +235,15 @@ export function ImportClient() {
                 key={i}
                 className="fill-2 flex items-center gap-3 rounded-2xl p-3"
               >
-                <span className="text-lg">{categoryMeta(d.category).emoji}</span>
+                <span
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full"
+                  style={{
+                    background: `${categoryMeta(d.category).color}1f`,
+                    color: categoryMeta(d.category).color,
+                  }}
+                >
+                  <CategoryIcon category={d.category} size={18} />
+                </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm">{d.description}</p>
                   <p className="text-dim text-xs">

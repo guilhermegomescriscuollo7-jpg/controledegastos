@@ -1,5 +1,5 @@
 import { loadData } from "@/lib/data";
-import { TransactionList } from "@/components/TransactionList";
+import { TransactionManager } from "@/components/TransactionManager";
 import { AddTransactionForm } from "@/components/AddTransactionForm";
 
 export const dynamic = "force-dynamic";
@@ -10,15 +10,18 @@ export default async function TransactionsPage() {
   return (
     <main className="space-y-5">
       <header>
-        <h1 className="text-2xl font-bold sm:text-3xl">Transações</h1>
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-[32px]">
+          Transações
+        </h1>
         <p className="text-dim text-sm">
-          {transactions.length} lançamentos {demo ? "(exemplo)" : ""}
+          {transactions.length} lançamentos {demo ? "(exemplo)" : ""} · toque em
+          uma transação para editar ou excluir
         </p>
       </header>
 
       <AddTransactionForm />
 
-      <TransactionList transactions={transactions} />
+      <TransactionManager transactions={transactions} demo={demo} />
     </main>
   );
 }

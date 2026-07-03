@@ -17,7 +17,7 @@ export interface Transaction {
   description: string;
   amount: number; // negativo = gasto, positivo = receita
   category: CategoryKey;
-  source: "manual" | "csv" | "pluggy";
+  source: "manual" | "csv" | "pdf" | "pluggy";
   account?: string | null; // "Nubank" | "Sicoob" | ...
   created_at?: string;
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { FinanceSummary } from "@/lib/finance";
 import { categoryMeta, BRL } from "@/lib/categories";
+import { Icon } from "@/components/icons";
 
 interface Props {
   summary: FinanceSummary;
@@ -44,9 +45,12 @@ export function AIAdvisor({ summary, savingsTarget }: Props) {
   return (
     <div className="glass glass-strong p-5">
       <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[#7c5cff] to-[#38bdf8] text-lg">
-            ✦
+        <div className="flex items-center gap-2.5">
+          <span
+            className="grid h-9 w-9 place-items-center rounded-full text-white"
+            style={{ background: "var(--accent)" }}
+          >
+            <Icon name="sparkles" size={18} strokeWidth={1.6} />
           </span>
           <div>
             <h3 className="font-semibold leading-tight">Consultor IA</h3>
@@ -59,9 +63,12 @@ export function AIAdvisor({ summary, savingsTarget }: Props) {
       </div>
 
       {over.length > 0 && (
-        <div className="mb-3 rounded-2xl border border-accent-red/40 bg-accent-red/10 p-3 text-sm">
-          ⚠️ <strong>Você estourou o limite</strong> em:{" "}
-          {over.map((c) => categoryMeta(c).label).join(", ")}.
+        <div className="mb-3 flex items-start gap-2 rounded-2xl border border-accent-red/40 bg-accent-red/10 p-3 text-sm">
+          <Icon name="alert" size={17} className="mt-0.5 shrink-0 text-accent-red" />
+          <span>
+            <strong>Você estourou o limite</strong> em:{" "}
+            {over.map((c) => categoryMeta(c).label).join(", ")}.
+          </span>
         </div>
       )}
 
@@ -81,20 +88,28 @@ export function AIAdvisor({ summary, savingsTarget }: Props) {
             {data.tips.map((t, i) => (
               <li
                 key={i}
-                className="fill-2 flex gap-2 rounded-2xl p-3 text-sm"
+                className="fill-2 flex gap-2.5 rounded-2xl p-3 text-sm"
               >
-                <span className="text-accent-green">✓</span>
+                <Icon
+                  name="check"
+                  size={17}
+                  strokeWidth={2}
+                  className="mt-0.5 shrink-0 text-accent-green"
+                />
                 <span>{t}</span>
               </li>
             ))}
           </ul>
           {data.savings_opportunity > 0 && (
-            <div className="rounded-2xl bg-accent-green/10 p-3 text-sm">
-              💰 Economia possível estimada:{" "}
-              <strong className="text-accent-green">
-                {BRL.format(data.savings_opportunity)}
-              </strong>{" "}
-              por mês.
+            <div className="flex items-center gap-2 rounded-2xl bg-accent-green/10 p-3 text-sm">
+              <Icon name="wallet" size={17} className="shrink-0 text-accent-green" />
+              <span>
+                Economia possível estimada:{" "}
+                <strong className="text-accent-green">
+                  {BRL.format(data.savings_opportunity)}
+                </strong>{" "}
+                por mês.
+              </span>
             </div>
           )}
           <p className="text-dim text-right text-[10px]">

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { EXPENSE_CATEGORIES, BRL } from "@/lib/categories";
+import { CategoryIcon } from "@/components/icons";
 import type { Budget, CategoryKey } from "@/lib/types";
 
 interface Props {
@@ -68,14 +69,14 @@ export function BudgetEditor({ budgets, savingsTarget, canEdit }: Props) {
     setSaving(false);
     if (e1 || e2) setMsg("Erro ao salvar: " + (e1 || e2)?.message);
     else {
-      setMsg("✓ Salvo!");
+      setMsg("Salvo com sucesso!");
       router.refresh();
     }
   }
 
   return (
     <div className="glass p-5">
-      <h3 className="mb-1 font-semibold">🎯 Meta e limites mensais</h3>
+      <h3 className="mb-1 font-semibold">Meta e limites mensais</h3>
       <p className="text-dim mb-4 text-xs">
         Defina quanto quer guardar e o teto de cada categoria. Estourou o teto =
         alerta no início.
@@ -95,8 +96,9 @@ export function BudgetEditor({ budgets, savingsTarget, canEdit }: Props) {
       <div className="space-y-3">
         {EXPENSE_CATEGORIES.map((c) => (
           <div key={c.key} className="flex items-center gap-3">
-            <span className="w-40 shrink-0 text-sm">
-              {c.emoji} {c.label}
+            <span className="flex w-40 shrink-0 items-center gap-2 text-sm">
+              <CategoryIcon category={c.key} size={17} className="shrink-0" />
+              {c.label}
             </span>
             <div className="relative flex-1">
               <span className="text-dim pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm">

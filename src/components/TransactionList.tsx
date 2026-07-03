@@ -1,4 +1,5 @@
 import { categoryMeta, BRL } from "@/lib/categories";
+import { CategoryIcon } from "@/components/icons";
 import type { Transaction } from "@/lib/types";
 
 function fmtDate(iso: string) {
@@ -23,10 +24,10 @@ export function TransactionList({
           return (
             <li key={t.id} className="flex items-center gap-3 px-2 py-3">
               <span
-                className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-lg"
-                style={{ background: `${meta.color}22` }}
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-full"
+                style={{ background: `${meta.color}1f`, color: meta.color }}
               >
-                {meta.emoji}
+                <CategoryIcon category={t.category} size={20} />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{t.description}</p>
