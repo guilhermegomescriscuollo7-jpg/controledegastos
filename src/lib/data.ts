@@ -14,6 +14,7 @@ export interface LoadedData {
   monthlySalary: number;
   demo: boolean;
   userEmail: string | null;
+  userName: string | null;
 }
 
 /**
@@ -30,6 +31,7 @@ export async function loadData(): Promise<LoadedData> {
       monthlySalary: DEMO_SALARY,
       demo: true,
       userEmail: null,
+      userName: null,
     };
   }
 
@@ -45,6 +47,7 @@ export async function loadData(): Promise<LoadedData> {
       monthlySalary: DEMO_SALARY,
       demo: true,
       userEmail: null,
+      userName: null,
     };
   }
 
@@ -66,5 +69,9 @@ export async function loadData(): Promise<LoadedData> {
     monthlySalary: profile?.monthly_salary ?? 0,
     demo: false,
     userEmail: user.email ?? null,
+    userName:
+      (user.user_metadata?.full_name as string | undefined) ||
+      user.email?.split("@")[0] ||
+      null,
   };
 }

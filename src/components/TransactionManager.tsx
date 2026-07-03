@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { categoryMeta, BRL, EXPENSE_CATEGORIES } from "@/lib/categories";
 import { CategoryIcon, Icon } from "@/components/icons";
+import { BankBadge } from "@/components/BankBadge";
 import type { Transaction, CategoryKey } from "@/lib/types";
 
 function fmtDate(iso: string) {
@@ -82,9 +83,10 @@ export function TransactionManager({
                 <p className="truncate text-sm font-medium">{t.description}</p>
                 <p className="text-dim text-xs">
                   {fmtDate(t.date)} · {meta.label}
-                  {t.account ? ` · ${t.account}` : ""}
                 </p>
               </div>
+
+              <BankBadge account={t.account} size={22} />
 
               <span
                 className={`shrink-0 text-sm font-semibold ${

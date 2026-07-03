@@ -1,8 +1,16 @@
 import { loadData } from "@/lib/data";
-import { summarize, dailySpendSeries, currentMonthKey } from "@/lib/finance";
+import {
+  summarize,
+  dailySpendSeries,
+  currentMonthKey,
+  expensesByAccount,
+  monthlyExpenseTotals,
+} from "@/lib/finance";
 import { StatCard } from "@/components/StatCard";
 import { SpendingChart } from "@/components/SpendingChart";
 import { CategoryDonut } from "@/components/CategoryDonut";
+import { AccountBreakdown } from "@/components/AccountBreakdown";
+import { MonthlyBarChart } from "@/components/MonthlyBarChart";
 import { BudgetList } from "@/components/BudgetList";
 import { AIAdvisor } from "@/components/AIAdvisor";
 import { TransactionList } from "@/components/TransactionList";
@@ -24,8 +32,14 @@ export default async function DashboardPage({
 }) {
   const { month } = await searchParams;
 
-  const { transactions, budgets, savingsTarget, monthlySalary, demo, userEmail } =
-    await loadData();
+  const {
+    transactions,
+    budgets,
+    savingsTarget,
+    monthlySalary,
+    demo,
+    userName,
+  } = await loadData();
 
   // Sem mês escolhido: abre no mês atual se ele tiver lançamentos;
   // senão, no mês mais recente que tem lançamentos (evita abrir "vazio").
@@ -39,6 +53,8 @@ export default async function DashboardPage({
     : latestMonth;
   const summary = summarize(transactions, budgets, monthKey, monthlySalary);
   const series = dailySpendSeries(transactions, monthKey);
+  const byAccount = expensesByAccount(transactions, monthKey);
+  const monthly = monthlyExpenseTotals(transactions, 6);
   const saved = summary.balance > 0 ? summary.balance : 0;
   const savingsPct =
     savingsTarget > 0 ? Math.round((saved / savingsTarget) * 100) : 0;
@@ -48,7 +64,7 @@ export default async function DashboardPage({
       <header className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight sm:text-[32px]">
-            Olá{userEmail ? `, ${userEmail.split("@")[0]}` : ""}
+            Olá{userName ? `, ${userName}` : ""}
           </h1>
           <p className="text-dim mt-0.5 text-sm">Seu resumo financeiro</p>
         </div>
@@ -63,8 +79,8 @@ export default async function DashboardPage({
         </div>
       </header>
 
-      {/* Filtro de mês/ano */}
-      <div className="flex items-center justify-between">
+      {/* Filtro de mês/ano (z-40 para o calendário abrir por cima dos cards) */}
+      <div className="relative z-40 flex items-center justify-between">
         <MonthPicker monthKey={monthKey} />
       </div>
 
@@ -109,6 +125,12 @@ export default async function DashboardPage({
       <section className="grid gap-5 lg:grid-cols-2">
         <SpendingChart data={series} />
         <CategoryDonut data={summary.byCategory} />
+      </section>
+
+      {/* Por cartão + evolução mensal */}
+      <section className="grid gap-5 lg:grid-cols-2">
+        <AccountBreakdown data={byAccount} />
+        <MonthlyBarChart data={monthly} currentKey={monthKey} />
       </section>
 
       <BudgetList status={summary.budgetStatus} />

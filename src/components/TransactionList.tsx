@@ -1,5 +1,6 @@
 import { categoryMeta, BRL } from "@/lib/categories";
 import { CategoryIcon } from "@/components/icons";
+import { BankBadge } from "@/components/BankBadge";
 import type { Transaction } from "@/lib/types";
 
 function fmtDate(iso: string) {
@@ -33,11 +34,11 @@ export function TransactionList({
                 <p className="truncate text-sm font-medium">{t.description}</p>
                 <p className="text-dim text-xs">
                   {fmtDate(t.date)} · {meta.label}
-                  {t.account ? ` · ${t.account}` : ""}
                 </p>
               </div>
+              <BankBadge account={t.account} size={22} />
               <span
-                className={`shrink-0 text-sm font-semibold ${
+                className={`w-24 shrink-0 text-right text-sm font-semibold ${
                   income ? "text-accent-green" : ""
                 }`}
               >

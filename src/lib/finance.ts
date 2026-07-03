@@ -8,6 +8,45 @@ export function inMonth(t: Transaction, monthKey: string) {
   return t.date.startsWith(monthKey);
 }
 
+const MESES_CURTO = [
+  "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+  "Jul", "Ago", "Set", "Out", "Nov", "Dez",
+];
+
+/** Gastos do mês agrupados por conta/cartão (Nubank, Sicoob, ...). */
+export function expensesByAccount(
+  transactions: Transaction[],
+  monthKey = currentMonthKey()
+) {
+  const map = new Map<string, number>();
+  for (const t of transactions) {
+    if (!inMonth(t, monthKey) || t.amount >= 0) continue;
+    const acc = t.account || "Outro";
+    map.set(acc, (map.get(acc) ?? 0) + Math.abs(t.amount));
+  }
+  return [...map.entries()]
+    .map(([account, total]) => ({ account, total }))
+    .sort((a, b) => b.total - a.total);
+}
+
+/** Total de gastos por mês, dos últimos N meses (para o gráfico de barras). */
+export function monthlyExpenseTotals(
+  transactions: Transaction[],
+  months = 6,
+  ref = new Date()
+) {
+  const out: { key: string; label: string; total: number }[] = [];
+  for (let i = months - 1; i >= 0; i--) {
+    const d = new Date(ref.getFullYear(), ref.getMonth() - i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const total = transactions
+      .filter((t) => inMonth(t, key) && t.amount < 0)
+      .reduce((s, t) => s + Math.abs(t.amount), 0);
+    out.push({ key, label: MESES_CURTO[d.getMonth()], total });
+  }
+  return out;
+}
+
 export interface FinanceSummary {
   income: number;
   expenses: number; // valor positivo

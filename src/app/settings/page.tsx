@@ -7,7 +7,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
-  const { budgets, savingsTarget, monthlySalary, demo, userEmail } =
+  const { budgets, savingsTarget, monthlySalary, demo, userEmail, userName } =
     await loadData();
 
   return (
@@ -19,7 +19,7 @@ export default async function SettingsPage() {
         <p className="text-dim text-sm">Conta, renda, metas e limites</p>
       </header>
 
-      <AuthBox email={userEmail} />
+      <AuthBox email={userEmail} name={userName} />
 
       <SalaryEditor salary={monthlySalary} canEdit={!demo} />
 
