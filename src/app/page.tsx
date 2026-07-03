@@ -23,10 +23,20 @@ export default async function DashboardPage({
   searchParams: Promise<{ month?: string }>;
 }) {
   const { month } = await searchParams;
-  const monthKey = isValidMonthKey(month) ? month : currentMonthKey();
 
   const { transactions, budgets, savingsTarget, monthlySalary, demo, userEmail } =
     await loadData();
+
+  // Sem mês escolhido: abre no mês atual se ele tiver lançamentos;
+  // senão, no mês mais recente que tem lançamentos (evita abrir "vazio").
+  const thisMonth = currentMonthKey();
+  const hasCurrent = transactions.some((t) => t.date.startsWith(thisMonth));
+  const latestMonth = transactions[0]?.date?.slice(0, 7);
+  const monthKey = isValidMonthKey(month)
+    ? month
+    : hasCurrent || !latestMonth
+    ? thisMonth
+    : latestMonth;
   const summary = summarize(transactions, budgets, monthKey, monthlySalary);
   const series = dailySpendSeries(transactions, monthKey);
   const saved = summary.balance > 0 ? summary.balance : 0;
