@@ -7,6 +7,7 @@ export type CategoryKey =
   | "combustivel"
   | "academia"
   | "internet"
+  | "pix"
   | "outros"
   | "receita";
 
