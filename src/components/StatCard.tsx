@@ -1,24 +1,32 @@
 import { BRL } from "@/lib/categories";
+import { Icon, type IconName } from "@/components/icons";
 
 interface Props {
   label: string;
   value: number;
   accent?: string;
   sub?: string;
-  icon?: string;
+  icon?: IconName;
 }
 
-export function StatCard({ label, value, accent = "#a78bfa", sub, icon }: Props) {
+export function StatCard({ label, value, accent = "var(--accent)", sub, icon }: Props) {
   return (
     <div className="glass animate-fadeup p-5">
       <div className="flex items-center justify-between">
-        <span className="text-dim text-xs font-medium uppercase tracking-wide">
+        <span className="text-dim text-[11px] font-medium uppercase tracking-wide">
           {label}
         </span>
-        {icon && <span className="text-lg opacity-80">{icon}</span>}
+        {icon && (
+          <span
+            className="grid h-7 w-7 place-items-center rounded-full"
+            style={{ background: `color-mix(in srgb, ${accent} 14%, transparent)`, color: accent }}
+          >
+            <Icon name={icon} size={15} strokeWidth={2} />
+          </span>
+        )}
       </div>
       <div
-        className="mt-2 text-2xl font-bold sm:text-3xl"
+        className="mt-2.5 text-2xl font-semibold tracking-tight sm:text-[28px]"
         style={{ color: accent }}
       >
         {BRL.format(value)}

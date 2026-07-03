@@ -26,7 +26,7 @@ export default async function SettingsPage() {
       />
 
       <div className="glass p-5 text-sm">
-        <h3 className="mb-2 font-semibold">🏦 Conexão bancária automática</h3>
+        <h3 className="mb-2 font-semibold">Conexão bancária automática</h3>
         <p className="text-dim">
           Nubank e Sicoob não têm API pública direta. A forma segura e legal de
           puxar transações automaticamente é via <strong>Open Finance</strong>,

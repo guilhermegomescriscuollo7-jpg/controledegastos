@@ -24,8 +24,8 @@ export function SpendingChart({ data }: Props) {
         <AreaChart data={data} margin={{ left: -18, right: 8, top: 4 }}>
           <defs>
             <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#a78bfa" stopOpacity={0.6} />
-              <stop offset="100%" stopColor="#7c5cff" stopOpacity={0.02} />
+              <stop offset="0%" stopColor="#0a84ff" stopOpacity={0.45} />
+              <stop offset="100%" stopColor="#0a84ff" stopOpacity={0.02} />
             </linearGradient>
           </defs>
           <CartesianGrid vertical={false} />
@@ -52,7 +52,7 @@ export function SpendingChart({ data }: Props) {
           <Area
             type="monotone"
             dataKey="acumulado"
-            stroke="#a78bfa"
+            stroke="#0a84ff"
             strokeWidth={2.5}
             fill="url(#grad)"
           />

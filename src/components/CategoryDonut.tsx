@@ -2,6 +2,7 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { categoryMeta, BRL } from "@/lib/categories";
+import { CategoryIcon } from "@/components/icons";
 import type { CategoryKey } from "@/lib/types";
 
 interface Props {
@@ -10,10 +11,10 @@ interface Props {
 
 export function CategoryDonut({ data }: Props) {
   const chartData = data.map((d) => ({
+    category: d.category,
     name: categoryMeta(d.category).label,
     value: d.total,
     color: categoryMeta(d.category).color,
-    emoji: categoryMeta(d.category).emoji,
   }));
   const total = data.reduce((s, d) => s + d.total, 0);
 
@@ -57,12 +58,14 @@ export function CategoryDonut({ data }: Props) {
         <ul className="flex-1 space-y-1.5 self-stretch">
           {chartData.slice(0, 6).map((d) => (
             <li key={d.name} className="flex items-center justify-between text-sm">
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-2.5">
                 <span
-                  className="inline-block h-2.5 w-2.5 rounded-full"
-                  style={{ background: d.color }}
-                />
-                {d.emoji} {d.name}
+                  className="grid h-6 w-6 shrink-0 place-items-center rounded-full"
+                  style={{ background: `${d.color}1f`, color: d.color }}
+                >
+                  <CategoryIcon category={d.category} size={14} />
+                </span>
+                {d.name}
               </span>
               <span className="text-dim">{BRL.format(d.value)}</span>
             </li>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Icon } from "@/components/icons";
 
 type Theme = "light" | "dark";
 
@@ -41,29 +42,23 @@ export function ThemeToggle({
     return (
       <div className="glass flex items-center justify-between p-5">
         <div>
-          <h3 className="font-semibold">🎨 Tema</h3>
+          <h3 className="font-semibold">Tema</h3>
           <p className="text-dim text-sm">Aparência do app</p>
         </div>
-        <div className="glass flex gap-1 rounded-full p-1">
+        <div className="fill-2 flex gap-1 rounded-full p-1">
           {(["light", "dark"] as Theme[]).map((t) => {
             const active = mounted && theme === t;
             return (
               <button
                 key={t}
                 onClick={() => change(t)}
-                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${
+                className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition ${
                   active ? "text-white" : "link-dim"
                 }`}
-                style={
-                  active
-                    ? {
-                        background:
-                          "linear-gradient(135deg, rgba(124,92,255,0.65), rgba(167,139,250,0.4))",
-                      }
-                    : undefined
-                }
+                style={active ? { background: "var(--accent)" } : undefined}
               >
-                {t === "light" ? "☀️ Claro" : "🌙 Escuro"}
+                <Icon name={t === "light" ? "sun" : "moon"} size={15} />
+                {t === "light" ? "Claro" : "Escuro"}
               </button>
             );
           })}
@@ -76,9 +71,9 @@ export function ThemeToggle({
     <button
       aria-label="Alternar tema claro/escuro"
       onClick={() => change(theme === "dark" ? "light" : "dark")}
-      className="btn-glass grid h-11 w-11 place-items-center !px-0 text-lg"
+      className="btn-glass grid h-11 w-11 place-items-center !px-0"
     >
-      {mounted ? (theme === "dark" ? "☀️" : "🌙") : "🌓"}
+      <Icon name={mounted && theme === "dark" ? "sun" : "moon"} size={19} />
     </button>
   );
 }

@@ -2,38 +2,41 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Icon, type IconName } from "@/components/icons";
 
-const items = [
-  { href: "/", label: "Início", icon: "◎" },
-  { href: "/transactions", label: "Gastos", icon: "≣" },
-  { href: "/import", label: "Importar", icon: "↥" },
-  { href: "/settings", label: "Ajustes", icon: "⚙" },
+const items: { href: string; label: string; icon: IconName }[] = [
+  { href: "/", label: "Início", icon: "home" },
+  { href: "/transactions", label: "Gastos", icon: "receipt" },
+  { href: "/import", label: "Importar", icon: "upload" },
+  { href: "/settings", label: "Ajustes", icon: "gear" },
 ];
 
 export function NavBar() {
   const path = usePathname();
   return (
     <nav className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2">
-      <div className="glass flex items-center gap-1 rounded-full px-2 py-2">
+      <div
+        className="flex items-center gap-1 rounded-full border p-1.5"
+        style={{
+          background: "var(--nav-bg)",
+          borderColor: "var(--card-border)",
+          backdropFilter: "blur(24px) saturate(180%)",
+          WebkitBackdropFilter: "blur(24px) saturate(180%)",
+          boxShadow: "var(--card-shadow)",
+        }}
+      >
         {items.map((it) => {
           const active = path === it.href;
           return (
             <Link
               key={it.href}
               href={it.href}
-              className={`flex flex-col items-center rounded-full px-4 py-1.5 text-[11px] font-medium transition ${
+              className={`flex min-w-[64px] flex-col items-center gap-0.5 rounded-full px-3 py-1.5 text-[11px] font-medium transition ${
                 active ? "text-white" : "link-dim"
               }`}
-              style={
-                active
-                  ? {
-                      background:
-                        "linear-gradient(135deg, rgba(124,92,255,0.55), rgba(167,139,250,0.35))",
-                    }
-                  : undefined
-              }
+              style={active ? { background: "var(--accent)" } : undefined}
             >
-              <span className="text-base leading-none">{it.icon}</span>
+              <Icon name={it.icon} size={19} strokeWidth={active ? 2 : 1.7} />
               {it.label}
             </Link>
           );

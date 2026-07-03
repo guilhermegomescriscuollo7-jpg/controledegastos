@@ -1,4 +1,5 @@
 import { categoryMeta, BRL } from "@/lib/categories";
+import { CategoryIcon } from "@/components/icons";
 import type { FinanceSummary } from "@/lib/finance";
 
 export function BudgetList({ status }: { status: FinanceSummary["budgetStatus"] }) {
@@ -14,15 +15,20 @@ export function BudgetList({ status }: { status: FinanceSummary["budgetStatus"] 
           const meta = categoryMeta(b.category);
           const pct = Math.min(b.pct, 1.15);
           const barColor = b.over
-            ? "#fb7185"
+            ? "#ff375f"
             : b.pct > 0.8
-            ? "#fbbf24"
+            ? "#ff9f0a"
             : meta.color;
           return (
             <li key={b.category}>
-              <div className="mb-1 flex items-center justify-between text-sm">
-                <span>
-                  {meta.emoji} {meta.label}
+              <div className="mb-1.5 flex items-center justify-between text-sm">
+                <span className="flex items-center gap-2">
+                  <CategoryIcon
+                    category={b.category}
+                    size={17}
+                    className="shrink-0"
+                  />
+                  {meta.label}
                 </span>
                 <span className={b.over ? "font-semibold text-accent-red" : "text-dim"}>
                   {BRL.format(b.spent)} / {BRL.format(b.limit)}

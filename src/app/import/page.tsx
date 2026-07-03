@@ -11,7 +11,7 @@ export default function ImportPage() {
       </header>
 
       <div className="glass border-accent-blue/30 p-4 text-sm">
-        <p className="mb-2 font-semibold">📲 Como pegar o CSV:</p>
+        <p className="mb-2 font-semibold">Como pegar o CSV:</p>
         <ul className="text-dim list-inside list-disc space-y-1">
           <li>
             <strong>Nubank:</strong> app → conta ou cartão → extrato/fatura →

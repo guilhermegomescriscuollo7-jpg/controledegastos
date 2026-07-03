@@ -15,7 +15,7 @@ export function AuthBox({ email }: { email: string | null }) {
   if (!configured) {
     return (
       <div className="glass p-5">
-        <h3 className="mb-1 font-semibold">🔌 Conexão</h3>
+        <h3 className="mb-1 font-semibold">Conexão</h3>
         <p className="text-dim text-sm">
           Supabase ainda não configurado. Rodando em <strong>modo demo</strong>.
           Siga o README para colar suas chaves em <code>.env.local</code>.
@@ -63,7 +63,7 @@ export function AuthBox({ email }: { email: string | null }) {
       <h3 className="mb-1 font-semibold">Entrar</h3>
       {sent ? (
         <p className="text-sm text-accent-green">
-          ✓ Link mágico enviado para <strong>{value}</strong>. Abra seu e-mail e
+          Link mágico enviado para <strong>{value}</strong>. Abra seu e-mail e
           clique para entrar.
         </p>
       ) : (

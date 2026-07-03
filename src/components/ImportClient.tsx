@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Papa from "papaparse";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { guessCategory, categoryMeta, BRL, EXPENSE_CATEGORIES, CATEGORIES } from "@/lib/categories";
+import { CategoryIcon, Icon } from "@/components/icons";
 import type { CategoryKey, Transaction } from "@/lib/types";
 
 type Draft = Omit<Transaction, "id">;
@@ -193,8 +194,9 @@ export function ImportClient() {
         </div>
       )}
       {done && (
-        <div className="glass border-accent-green/40 p-4 text-sm text-accent-green">
-          ✓ Transações importadas com sucesso!
+        <div className="glass flex items-center gap-2 p-4 text-sm text-accent-green">
+          <Icon name="check" size={17} strokeWidth={2} />
+          Transações importadas com sucesso!
         </div>
       )}
 
@@ -217,7 +219,15 @@ export function ImportClient() {
                 key={i}
                 className="fill-2 flex items-center gap-3 rounded-2xl p-3"
               >
-                <span className="text-lg">{categoryMeta(d.category).emoji}</span>
+                <span
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full"
+                  style={{
+                    background: `${categoryMeta(d.category).color}1f`,
+                    color: categoryMeta(d.category).color,
+                  }}
+                >
+                  <CategoryIcon category={d.category} size={18} />
+                </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm">{d.description}</p>
                   <p className="text-dim text-xs">
