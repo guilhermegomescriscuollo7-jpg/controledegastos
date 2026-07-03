@@ -1,0 +1,18 @@
+{
+  "name": "Controle de Gastos",
+  "short_name": "Gastos",
+  "description": "Seu gestor financeiro pessoal com IA.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0912",
+  "theme_color": "#0a0912",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

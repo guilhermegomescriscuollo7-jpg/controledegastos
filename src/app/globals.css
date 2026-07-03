@@ -1,0 +1,234 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== TEMA ESCURO (padrão) ===== */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-base: #0a0912;
+  --bg-radial: #1a1330;
+  --text: #f4f2fb;
+  --text-dim: rgba(244, 242, 251, 0.62);
+
+  --glass-from: rgba(255, 255, 255, 0.12);
+  --glass-to: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-highlight: rgba(255, 255, 255, 0.22);
+  --glass-spec: rgba(255, 255, 255, 0.16);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --glass-hover-from: rgba(255, 255, 255, 0.2);
+  --glass-hover-to: rgba(255, 255, 255, 0.08);
+  --glass-strong-from: rgba(255, 255, 255, 0.18);
+  --glass-strong-to: rgba(255, 255, 255, 0.07);
+
+  --input-bg: rgba(255, 255, 255, 0.06);
+  --surface-1: rgba(255, 255, 255, 0.1);
+  --surface-2: rgba(255, 255, 255, 0.05);
+  --hairline: rgba(255, 255, 255, 0.08);
+  --select-bg: #140f26;
+  --tooltip-bg: rgba(20, 15, 38, 0.9);
+  --scrollbar: rgba(255, 255, 255, 0.15);
+  --blob-opacity: 0.55;
+}
+
+/* ===== TEMA CLARO ===== */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg-base: #eceaf6;
+  --bg-radial: #f7f5ff;
+  --text: #1c1330;
+  --text-dim: rgba(28, 19, 48, 0.6);
+
+  --glass-from: rgba(255, 255, 255, 0.78);
+  --glass-to: rgba(255, 255, 255, 0.42);
+  --glass-border: rgba(255, 255, 255, 0.9);
+  --glass-highlight: rgba(255, 255, 255, 0.95);
+  --glass-spec: rgba(255, 255, 255, 0.7);
+  --glass-shadow: 0 10px 30px rgba(70, 60, 110, 0.15);
+  --glass-hover-from: rgba(255, 255, 255, 0.92);
+  --glass-hover-to: rgba(255, 255, 255, 0.62);
+  --glass-strong-from: rgba(255, 255, 255, 0.88);
+  --glass-strong-to: rgba(255, 255, 255, 0.6);
+
+  --input-bg: rgba(255, 255, 255, 0.6);
+  --surface-1: rgba(28, 19, 48, 0.06);
+  --surface-2: rgba(28, 19, 48, 0.035);
+  --hairline: rgba(28, 19, 48, 0.08);
+  --select-bg: #ffffff;
+  --tooltip-bg: rgba(255, 255, 255, 0.95);
+  --scrollbar: rgba(28, 19, 48, 0.2);
+  --blob-opacity: 0.32;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  color: var(--text);
+  background: var(--bg-base);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+    Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+/* ===== Fundo com gradiente "mesh" animado ===== */
+.app-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 0%, var(--bg-radial) 0%, var(--bg-base) 60%);
+}
+.app-bg::before,
+.app-bg::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: var(--blob-opacity);
+}
+.app-bg::before {
+  width: 45vw;
+  height: 45vw;
+  left: -8vw;
+  top: -6vw;
+  background: radial-gradient(circle, #7c5cff, transparent 70%);
+  animation: floaty 12s ease-in-out infinite;
+}
+.app-bg::after {
+  width: 40vw;
+  height: 40vw;
+  right: -6vw;
+  bottom: -8vw;
+  background: radial-gradient(circle, #38bdf8, transparent 70%);
+  animation: floaty 14s ease-in-out infinite reverse;
+}
+.app-bg .blob-3 {
+  position: absolute;
+  width: 30vw;
+  height: 30vw;
+  right: 20vw;
+  top: 30vh;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: calc(var(--blob-opacity) * 0.65);
+  background: radial-gradient(circle, #fb7185, transparent 70%);
+  animation: floaty 16s ease-in-out infinite;
+}
+
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-30px) translateX(20px);
+  }
+}
+
+/* ===== Superficie de vidro (Liquid Glass) ===== */
+@layer components {
+  .glass {
+    position: relative;
+    background: linear-gradient(135deg, var(--glass-from), var(--glass-to));
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+    border-radius: 1.75rem;
+  }
+  .glass::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(180deg, var(--glass-spec) 0%, transparent 30%);
+    pointer-events: none;
+  }
+
+  .glass-strong {
+    background: linear-gradient(
+      135deg,
+      var(--glass-strong-from),
+      var(--glass-strong-to)
+    );
+  }
+
+  .btn-glass {
+    @apply glass rounded-full px-5 py-2.5 text-sm font-semibold transition;
+    cursor: pointer;
+  }
+  .btn-glass:hover {
+    background: linear-gradient(
+      135deg,
+      var(--glass-hover-from),
+      var(--glass-hover-to)
+    );
+  }
+  .btn-primary {
+    @apply rounded-full px-5 py-2.5 text-sm font-semibold text-white transition;
+    background: linear-gradient(135deg, #7c5cff, #a78bfa);
+    box-shadow: 0 8px 24px rgba(124, 92, 255, 0.45);
+    cursor: pointer;
+  }
+  .btn-primary:hover {
+    filter: brightness(1.08);
+  }
+
+  .input-glass {
+    @apply glass rounded-2xl px-4 py-3 text-sm w-full outline-none;
+    background: var(--input-bg);
+    color: var(--text);
+  }
+  .input-glass::placeholder {
+    color: var(--text-dim);
+  }
+  .input-glass:focus {
+    border-color: rgba(167, 139, 250, 0.6);
+  }
+
+  /* superficies semanticas que se adaptam ao tema */
+  .fill-1 {
+    background: var(--surface-1);
+  }
+  .fill-2 {
+    background: var(--surface-2);
+  }
+  /* link discreto que escurece/clareia no hover conforme o tema */
+  .link-dim {
+    color: var(--text-dim);
+    transition: color 0.2s ease;
+  }
+  .link-dim:hover {
+    color: var(--text);
+  }
+}
+
+.text-dim {
+  color: var(--text-dim);
+}
+
+/* scrollbar discreta */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar);
+  border-radius: 8px;
+}
+
+/* Recharts: cor do texto e das linhas de grade seguem o tema */
+.recharts-text {
+  fill: var(--text-dim);
+  font-size: 12px;
+}
+.recharts-cartesian-grid line {
+  stroke: var(--hairline);
+}
