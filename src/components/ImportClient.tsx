@@ -60,8 +60,9 @@ export function ImportClient() {
         raw.map((d) => ({
           date: d.date,
           description: d.description,
-          amount: d.amount,
-          category: d.amount > 0 ? "receita" : guessCategory(d.description),
+          // Importação é sempre gasto (receita = apenas o salário em Ajustes)
+          amount: -Math.abs(d.amount),
+          category: guessCategory(d.description),
           source: "pdf" as const,
           account,
         }))
@@ -109,12 +110,12 @@ export function ImportClient() {
           const amount = parseAmount(row[amountCol]);
           const description = (row[descCol] ?? "").trim();
           if (!date || amount === null || !description) continue;
-          const isIncome = amount > 0;
           parsed.push({
             date,
             description,
-            amount,
-            category: isIncome ? "receita" : guessCategory(description),
+            // Importação é sempre gasto (receita = apenas o salário em Ajustes)
+            amount: -Math.abs(amount),
+            category: guessCategory(description),
             source: "csv",
             account,
           });

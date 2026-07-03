@@ -37,7 +37,8 @@ export type IconName =
   | "dumbbell"
   | "wifi"
   | "dots"
-  | "wallet";
+  | "wallet"
+  | "transfer";
 
 // Paths desenhados no viewBox 24x24, traço fino (estilo SF Symbols).
 const PATHS: Record<IconName, React.ReactNode> = {
@@ -198,6 +199,12 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <circle cx="16.5" cy="13" r="1.2" fill="currentColor" stroke="none" />
     </>
   ),
+  transfer: (
+    <>
+      <path d="M5 9h11M16 9l-3-3M16 9l-3 3" />
+      <path d="M19 15H8M8 15l3-3M8 15l3 3" />
+    </>
+  ),
 };
 
 export function Icon({
@@ -241,6 +248,7 @@ export const CATEGORY_ICON: Record<CategoryKey, IconName> = {
   combustivel: "fuel",
   academia: "dumbbell",
   internet: "wifi",
+  pix: "transfer",
   outros: "dots",
   receita: "wallet",
 };
