@@ -11,7 +11,6 @@ const iso = (day: number) =>
   `${y}-${String(m + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
 export const DEMO_TRANSACTIONS: Transaction[] = [
-  { id: "d1", date: iso(5), description: "Salário", amount: 6800, category: "receita", source: "manual", account: "Sicoob" },
   { id: "d2", date: iso(6), description: "Financiamento Santander - Parcela carro", amount: -1290, category: "financiamento_carro", source: "csv", account: "Sicoob" },
   { id: "d3", date: iso(8), description: "Porto Seguro - Seguro auto", amount: -320, category: "seguro_carro", source: "csv", account: "Nubank" },
   { id: "d4", date: iso(3), description: "Netflix", amount: -55.9, category: "assinaturas", source: "csv", account: "Nubank" },
@@ -40,3 +39,5 @@ export const DEMO_BUDGETS: Budget[] = [
 ];
 
 export const DEMO_SAVINGS_TARGET = 1000;
+
+export const DEMO_SALARY = 6800;

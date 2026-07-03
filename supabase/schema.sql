@@ -38,12 +38,20 @@ create table if not exists public.monthly_goals (
   primary key (user_id, month)
 );
 
+-- ---------- PERFIL (salario mensal fixo) ----------
+create table if not exists public.profiles (
+  user_id        uuid primary key references auth.users(id) on delete cascade,
+  monthly_salary numeric(12,2) not null default 0,
+  updated_at     timestamptz not null default now()
+);
+
 -- ============================================================
 --  SEGURANCA: Row Level Security (cada um so ve o que e seu)
 -- ============================================================
 alter table public.transactions  enable row level security;
 alter table public.budgets        enable row level security;
 alter table public.monthly_goals  enable row level security;
+alter table public.profiles       enable row level security;
 
 -- transactions
 drop policy if exists "own transactions" on public.transactions;
@@ -58,4 +66,9 @@ create policy "own budgets" on public.budgets
 -- monthly_goals
 drop policy if exists "own goals" on public.monthly_goals;
 create policy "own goals" on public.monthly_goals
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- profiles
+drop policy if exists "own profile" on public.profiles;
+create policy "own profile" on public.profiles
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

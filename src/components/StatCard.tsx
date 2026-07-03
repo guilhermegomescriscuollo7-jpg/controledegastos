@@ -11,7 +11,7 @@ interface Props {
 
 export function StatCard({ label, value, accent = "var(--accent)", sub, icon }: Props) {
   return (
-    <div className="glass animate-fadeup p-5">
+    <div className="glass p-5">
       <div className="flex items-center justify-between">
         <span className="text-dim text-[11px] font-medium uppercase tracking-wide">
           {label}

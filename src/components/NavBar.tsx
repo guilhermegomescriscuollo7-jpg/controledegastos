@@ -13,6 +13,7 @@ const items: { href: string; label: string; icon: IconName }[] = [
 
 export function NavBar() {
   const path = usePathname();
+  if (path === "/login" || path === "/signup") return null;
   return (
     <nav className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2">
       <div

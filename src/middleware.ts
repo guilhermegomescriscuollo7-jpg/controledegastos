@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+const PUBLIC_PATHS = ["/login", "/signup", "/auth"];
+
 export async function middleware(request: NextRequest) {
   // Sem Supabase configurado -> modo demo, nao mexe em nada.
   if (
@@ -39,12 +41,32 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Mantem a sessao atualizada.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const path = request.nextUrl.pathname;
+  const isPublic = PUBLIC_PATHS.some((p) => path.startsWith(p));
+
+  // Não logado tentando acessar área protegida -> login
+  if (!user && !isPublic) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  // Já logado tentando abrir login/cadastro -> dashboard
+  if (user && (path.startsWith("/login") || path.startsWith("/signup"))) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    return NextResponse.redirect(url);
+  }
 
   return response;
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|manifest.json|icons|.*\\.png$).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|manifest.json|icons|.*\\.png$|.*\\.svg$).*)",
+  ],
 };

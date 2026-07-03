@@ -24,6 +24,9 @@ export type IconName =
   | "wave"
   | "wifi-signal"
   | "arrow-right"
+  | "edit"
+  | "trash"
+  | "file"
   // categorias
   | "car"
   | "shield"
@@ -96,6 +99,25 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <rect x="4" y="5.5" width="16" height="15" rx="2.5" />
       <path d="M4 9.5h16M8 3.5v4M16 3.5v4" />
+    </>
+  ),
+  edit: (
+    <>
+      <path d="M4 20h4L18.5 9.5a2 2 0 0 0 0-2.8l-1.2-1.2a2 2 0 0 0-2.8 0L4 16v4Z" />
+      <path d="M13.5 6.5 17.5 10.5" />
+    </>
+  ),
+  trash: (
+    <>
+      <path d="M5 7h14M10 7V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2" />
+      <path d="M6.5 7l.8 12a1 1 0 0 0 1 .95h7.4a1 1 0 0 0 1-.95L17.5 7" />
+      <path d="M10 11v5M14 11v5" />
+    </>
+  ),
+  file: (
+    <>
+      <path d="M7 3.5h7l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19V5A1.5 1.5 0 0 1 7 3.5Z" />
+      <path d="M14 3.5V8h4M9 13h6M9 16h4" />
     </>
   ),
   "chevron-left": <path d="M14.5 6 8.5 12l6 6" />,

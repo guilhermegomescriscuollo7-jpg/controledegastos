@@ -25,9 +25,9 @@ export default async function DashboardPage({
   const { month } = await searchParams;
   const monthKey = isValidMonthKey(month) ? month : currentMonthKey();
 
-  const { transactions, budgets, savingsTarget, demo, userEmail } =
+  const { transactions, budgets, savingsTarget, monthlySalary, demo, userEmail } =
     await loadData();
-  const summary = summarize(transactions, budgets, monthKey);
+  const summary = summarize(transactions, budgets, monthKey, monthlySalary);
   const series = dailySpendSeries(transactions, monthKey);
   const saved = summary.balance > 0 ? summary.balance : 0;
   const savingsPct =
