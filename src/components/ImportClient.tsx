@@ -34,6 +34,54 @@ export function ImportClient() {
   const [saving, setSaving] = useState(false);
   const [parsing, setParsing] = useState(false);
   const [done, setDone] = useState<string | null>(null);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiApplied, setAiApplied] = useState(false);
+
+  /**
+   * Mostra os rascunhos com as categorias por regras e, em paralelo,
+   * pede ao Claude uma categorização mais precisa. Sem chave da IA (ou
+   * com erro), as sugestões por regras permanecem.
+   */
+  async function finishParsing(parsed: Draft[]) {
+    setAiApplied(false);
+    setDrafts(parsed);
+    if (!configured) return;
+
+    const idx = parsed
+      .map((d, i) => (d.amount < 0 ? i : -1))
+      .filter((i) => i >= 0)
+      .slice(0, 150);
+    if (idx.length === 0) return;
+
+    setAiBusy(true);
+    try {
+      const res = await fetch("/api/categorize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          descriptions: idx.map((i) => parsed[i].description),
+        }),
+      });
+      if (!res.ok) return;
+      const { categories } = (await res.json()) as {
+        categories: CategoryKey[] | null;
+      };
+      if (!categories) return;
+      setDrafts((cur) =>
+        cur.map((d, i) => {
+          const pos = idx.indexOf(i);
+          return pos >= 0 && d.amount < 0
+            ? { ...d, category: categories[pos] }
+            : d;
+        })
+      );
+      setAiApplied(true);
+    } catch {
+      // mantém as categorias por regras
+    } finally {
+      setAiBusy(false);
+    }
+  }
 
   function onFile(file: File) {
     setError(null);
@@ -56,7 +104,7 @@ export function ImportClient() {
         );
         return;
       }
-      setDrafts(
+      await finishParsing(
         raw.map((d) => ({
           date: d.date,
           description: d.description,
@@ -123,7 +171,7 @@ export function ImportClient() {
           setError("Não consegui ler nenhuma linha válida.");
           return;
         }
-        setDrafts(parsed);
+        void finishParsing(parsed);
       },
       error: (err) => setError("Erro ao ler CSV: " + err.message),
     });
@@ -250,7 +298,18 @@ export function ImportClient() {
             <div>
               <h3 className="font-semibold">{drafts.length} transações</h3>
               <p className="text-dim text-xs">
-                Total de gastos: {BRL.format(total)} · revise as categorias
+                Total de gastos: {BRL.format(total)} ·{" "}
+                {aiBusy ? (
+                  <span className="text-[color:var(--accent)]">
+                    IA revisando as categorias…
+                  </span>
+                ) : aiApplied ? (
+                  <span className="text-accent-green">
+                    categorias sugeridas pela IA — revise e salve
+                  </span>
+                ) : (
+                  "revise as categorias"
+                )}
               </p>
             </div>
             <button className="btn-primary" onClick={save} disabled={saving}>

@@ -1,14 +1,27 @@
 import { loadData } from "@/lib/data";
+import { createClient } from "@/lib/supabase/server";
 import { AuthBox } from "@/components/AuthBox";
 import { BudgetEditor } from "@/components/BudgetEditor";
 import { SalaryEditor } from "@/components/SalaryEditor";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { RecurringEditor } from "@/components/RecurringEditor";
+import type { RecurringRule } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
+async function loadRecurringRules(): Promise<RecurringRule[]> {
+  const supabase = await createClient();
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("recurring_rules")
+    .select("*")
+    .order("created_at", { ascending: true });
+  return (data as RecurringRule[]) ?? [];
+}
+
 export default async function SettingsPage() {
-  const { budgets, savingsTarget, monthlySalary, demo, userEmail } =
-    await loadData();
+  const [{ budgets, savingsTarget, monthlySalary, demo, userEmail }, rules] =
+    await Promise.all([loadData(undefined, 1), loadRecurringRules()]);
 
   return (
     <main className="space-y-5">
@@ -22,6 +35,8 @@ export default async function SettingsPage() {
       <AuthBox email={userEmail} />
 
       <SalaryEditor salary={monthlySalary} canEdit={!demo} />
+
+      <RecurringEditor rules={rules} canEdit={!demo} />
 
       <ThemeToggle variant="segmented" />
 

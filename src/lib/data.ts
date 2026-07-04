@@ -1,5 +1,6 @@
 import { createClient } from "./supabase/server";
 import { currentMonthKey } from "./finance";
+import { applyRecurringRules, addMonths } from "./recurring";
 import {
   DEMO_TRANSACTIONS,
   DEMO_BUDGETS,
@@ -21,8 +22,15 @@ export interface LoadedData {
  * Carrega dados do usuario logado. Sem Supabase ou sem login -> dados demo.
  * A meta de economia e a do mes pedido; se nao houver, vale a mais recente
  * anterior a ele (a meta "atual" continua valendo nos meses seguintes).
+ *
+ * `historyMonths` limita as transacoes a uma janela terminando no mes
+ * pedido (o dashboard usa 12; sem o parametro carrega tudo, como na
+ * tela de transacoes, que precisa do historico completo).
  */
-export async function loadData(monthKey?: string): Promise<LoadedData> {
+export async function loadData(
+  monthKey?: string,
+  historyMonths?: number
+): Promise<LoadedData> {
   const month = monthKey ?? currentMonthKey();
   const supabase = await createClient();
 
@@ -52,12 +60,23 @@ export async function loadData(monthKey?: string): Promise<LoadedData> {
     };
   }
 
+  // Lanca as recorrentes pendentes antes de ler (idempotente).
+  await applyRecurringRules(supabase, user.id);
+
+  let txQuery = supabase
+    .from("transactions")
+    .select("*")
+    .order("date", { ascending: false });
+  if (historyMonths && historyMonths > 0) {
+    txQuery = txQuery.gte(
+      "date",
+      `${addMonths(month, -(historyMonths - 1))}-01`
+    );
+  }
+
   const [{ data: tx }, { data: bud }, { data: goal }, { data: profile }] =
     await Promise.all([
-      supabase
-        .from("transactions")
-        .select("*")
-        .order("date", { ascending: false }),
+      txQuery,
       supabase.from("budgets").select("*"),
       supabase
         .from("monthly_goals")

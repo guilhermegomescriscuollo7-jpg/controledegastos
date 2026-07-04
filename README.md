@@ -92,6 +92,29 @@ O sistema detecta as colunas de data, descrição e valor, e **sugere a categori
 > Reimportar o mesmo arquivo é seguro: transações repetidas (mesma data,
 > descrição e valor já salvos) são **ignoradas automaticamente**.
 
+Com a `ANTHROPIC_API_KEY` configurada, a **IA revisa as categorias** do
+lote inteiro em uma chamada barata ao Claude Haiku — bem mais preciso que
+as regras por palavra-chave. Sem a chave, as regras locais continuam valendo.
+
+## 🔁 Transações recorrentes
+
+Em **Ajustes → Transações recorrentes**, cadastre lançamentos que se repetem
+(financiamento, seguro, assinaturas, salário extra…): descrição, valor,
+categoria e o dia do mês (1–28). O app lança automaticamente ao abrir o mês —
+com proteção contra duplicidade mesmo se você abrir em dois aparelhos ao
+mesmo tempo. Dá para pausar ou excluir uma regra a qualquer momento.
+
+> **Projeto existente?** Rode o arquivo
+> [`supabase/migration-recorrentes.sql`](supabase/migration-recorrentes.sql)
+> no SQL Editor do Supabase uma única vez. Instalações novas já ganham tudo
+> pelo `schema.sql`.
+
+## 📴 Funciona offline
+
+O app registra um service worker em produção: depois da primeira visita,
+abre mesmo sem internet mostrando o último conteúdo carregado (útil no metrô).
+Alterações continuam precisando de conexão.
+
 - **Nubank:** conta ou cartão → extrato/fatura → exportar CSV.
 - **Sicoob:** extrato → período → exportar CSV.
 

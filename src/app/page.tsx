@@ -40,7 +40,7 @@ export default async function DashboardPage({
   const monthKey = isValidMonthKey(month) ? month : currentMonthKey();
 
   const { transactions, budgets, savingsTarget, monthlySalary, demo, userEmail } =
-    await loadData(monthKey);
+    await loadData(monthKey, 12);
   const summary = summarize(transactions, budgets, monthKey, monthlySalary);
   const series = dailySpendSeries(transactions, monthKey);
   const compare = monthlyExpenseTotals(transactions, monthKey);

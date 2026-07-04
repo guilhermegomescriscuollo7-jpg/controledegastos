@@ -38,6 +38,27 @@ create table if not exists public.monthly_goals (
   primary key (user_id, month)
 );
 
+-- ---------- TRANSACOES RECORRENTES ----------
+create table if not exists public.recurring_rules (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references auth.users(id) on delete cascade,
+  description  text not null,
+  amount       numeric(12,2) not null,          -- negativo = gasto, positivo = receita
+  category     text not null default 'outros',
+  account      text,
+  day_of_month int  not null default 1 check (day_of_month between 1 and 28),
+  active       boolean not null default true,
+  applied_until text,                            -- 'yyyy-mm' do ultimo mes ja lancado
+  created_at   timestamptz not null default now()
+);
+
+-- vinculo transacao <-> regra + protecao contra lancamento duplicado
+alter table public.transactions
+  add column if not exists rule_id uuid references public.recurring_rules(id) on delete set null;
+
+create unique index if not exists transactions_rule_date_uidx
+  on public.transactions (rule_id, date);
+
 -- ---------- PERFIL (salario mensal fixo) ----------
 create table if not exists public.profiles (
   user_id        uuid primary key references auth.users(id) on delete cascade,
@@ -71,4 +92,10 @@ create policy "own goals" on public.monthly_goals
 -- profiles
 drop policy if exists "own profile" on public.profiles;
 create policy "own profile" on public.profiles
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- recurring_rules
+alter table public.recurring_rules enable row level security;
+drop policy if exists "own recurring" on public.recurring_rules;
+create policy "own recurring" on public.recurring_rules
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
