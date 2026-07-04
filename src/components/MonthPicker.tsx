@@ -90,7 +90,7 @@ export function MonthPicker({ monthKey }: { monthKey: string }) {
           <div
             ref={panelRef}
             className="glass animate-fadeup fixed z-50 w-72 p-4"
-            style={{ top: coords.top, left: coords.left }}
+            style={{ top: coords.top, left: coords.left, background: "var(--popover-bg)" }}
             role="dialog"
           >
             <div className="mb-3 flex items-center justify-between">
