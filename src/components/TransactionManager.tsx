@@ -1,15 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
-import { categoryMeta, BRL, EXPENSE_CATEGORIES } from "@/lib/categories";
+import { categoryMeta, BRL, EXPENSE_CATEGORIES, CATEGORIES } from "@/lib/categories";
 import { CategoryIcon, Icon } from "@/components/icons";
 import type { Transaction, CategoryKey } from "@/lib/types";
 
 function fmtDate(iso: string) {
   const [, mm, dd] = iso.split("-");
   return `${dd}/${mm}`;
+}
+
+function exportCsv(transactions: Transaction[]) {
+  const esc = (s: string) => `"${s.replace(/"/g, '""')}"`;
+  const lines = [
+    "data,descricao,valor,categoria,conta",
+    ...transactions.map((t) =>
+      [
+        t.date,
+        esc(t.description),
+        String(t.amount).replace(".", ","),
+        categoryMeta(t.category).label,
+        t.account ?? "",
+      ].join(",")
+    ),
+  ];
+  // BOM para o Excel abrir acentos corretamente
+  const blob = new Blob(["﻿" + lines.join("\r\n")], {
+    type: "text/csv;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `transacoes-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 export function TransactionManager({
@@ -24,6 +50,20 @@ export function TransactionManager({
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [catFilter, setCatFilter] = useState<CategoryKey | "todas">("todas");
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return transactions.filter((t) => {
+      if (catFilter !== "todas" && t.category !== catFilter) return false;
+      if (!q) return true;
+      return (
+        t.description.toLowerCase().includes(q) ||
+        (t.account ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [transactions, search, catFilter]);
 
   async function remove(id: string) {
     if (demo || !isSupabaseConfigured()) {
@@ -42,11 +82,53 @@ export function TransactionManager({
 
   return (
     <div className="glass p-2 sm:p-3">
+      {/* Busca, filtro e exportação */}
+      <div className="flex flex-wrap items-center gap-2 px-2 pb-2 pt-1">
+        <div className="relative min-w-[160px] flex-1">
+          <Icon
+            name="search"
+            size={15}
+            className="text-dim pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
+          />
+          <input
+            className="input-glass py-2 pl-9 text-sm"
+            placeholder="Buscar por descrição ou conta"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <select
+          className="input-glass w-auto py-2 text-sm"
+          value={catFilter}
+          onChange={(e) => setCatFilter(e.target.value as CategoryKey | "todas")}
+          aria-label="Filtrar por categoria"
+        >
+          <option value="todas" className="bg-[var(--select-bg)] text-[color:var(--text)]">
+            Todas as categorias
+          </option>
+          {EXPENSE_CATEGORIES.map((c) => (
+            <option key={c.key} value={c.key} className="bg-[var(--select-bg)] text-[color:var(--text)]">
+              {c.label}
+            </option>
+          ))}
+          <option value="receita" className="bg-[var(--select-bg)] text-[color:var(--text)]">
+            {CATEGORIES.receita.label}
+          </option>
+        </select>
+        <button
+          className="btn-glass flex items-center gap-1.5 py-2 text-sm"
+          onClick={() => exportCsv(filtered)}
+          disabled={filtered.length === 0}
+        >
+          <Icon name="file" size={15} /> Exportar CSV
+        </button>
+      </div>
+
       {err && (
         <p className="px-3 py-2 text-sm text-accent-red">{err}</p>
       )}
       <ul className="divide-y divide-[var(--hairline)]">
-        {transactions.map((t) => {
+        {filtered.map((t) => {
           const meta = categoryMeta(t.category);
           const income = t.amount >= 0;
 
@@ -120,9 +202,11 @@ export function TransactionManager({
             </li>
           );
         })}
-        {transactions.length === 0 && (
+        {filtered.length === 0 && (
           <li className="text-dim px-3 py-8 text-center text-sm">
-            Nenhuma transação ainda.
+            {transactions.length === 0
+              ? "Nenhuma transação ainda."
+              : "Nenhuma transação encontrada com esses filtros."}
           </li>
         )}
       </ul>
@@ -199,8 +283,13 @@ function EditRow({
       return;
     }
     const value = parseFloat(amount.replace(",", "."));
-    if (!description || isNaN(value)) {
-      setMsg("Preencha descrição e valor.");
+    if (!description.trim() || isNaN(value) || value <= 0) {
+      setMsg("Preencha a descrição e um valor maior que zero.");
+      return;
+    }
+    const year = Number(date.slice(0, 4));
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || year < 2000 || year > new Date().getFullYear() + 1) {
+      setMsg("Data inválida.");
       return;
     }
     setSaving(true);

@@ -89,6 +89,9 @@ git push -u origin main
 Aba **Importar** → escolha a conta → selecione o **CSV** que você baixou do app do banco.
 O sistema detecta as colunas de data, descrição e valor, e **sugere a categoria** de cada gasto (você pode ajustar antes de salvar).
 
+> Reimportar o mesmo arquivo é seguro: transações repetidas (mesma data,
+> descrição e valor já salvos) são **ignoradas automaticamente**.
+
 - **Nubank:** conta ou cartão → extrato/fatura → exportar CSV.
 - **Sicoob:** extrato → período → exportar CSV.
 
@@ -113,6 +116,15 @@ src/
   lib/                  Supabase, cálculos, categorias, dados demo
 supabase/schema.sql     Tabelas + segurança (RLS)
 ```
+
+## 🧪 Testes
+
+```bash
+npm test
+```
+
+Roda os testes unitários (parsing de extratos e cálculos financeiros) com
+Vitest. O GitHub Actions executa testes + build a cada push na `main`.
 
 ## 💡 Como funciona o controle
 

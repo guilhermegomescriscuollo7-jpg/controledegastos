@@ -33,11 +33,11 @@ export function ImportClient() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [parsing, setParsing] = useState(false);
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState<string | null>(null);
 
   function onFile(file: File) {
     setError(null);
-    setDone(false);
+    setDone(null);
     setDrafts([]);
     const isPdf =
       file.type === "application/pdf" || /\.pdf$/i.test(file.name);
@@ -150,12 +150,40 @@ export function ImportClient() {
       return;
     }
     const payload = drafts.map((d) => ({ ...d, user_id: user.id }));
-    const { error } = await supabase.from("transactions").insert(payload);
+
+    // Evita duplicar ao reimportar o mesmo extrato: compara com o que ja
+    // existe no banco no mesmo periodo (data + descricao + valor).
+    const dates = payload.map((d) => d.date).sort();
+    const { data: existing } = await supabase
+      .from("transactions")
+      .select("date, description, amount")
+      .gte("date", dates[0])
+      .lte("date", dates[dates.length - 1]);
+    const dupKey = (t: { date: string; description: string; amount: number }) =>
+      `${t.date}|${t.description.trim().toLowerCase()}|${Number(t.amount).toFixed(2)}`;
+    const seen = new Set((existing ?? []).map(dupKey));
+    const fresh = payload.filter((d) => !seen.has(dupKey(d)));
+    const skipped = payload.length - fresh.length;
+
+    if (fresh.length === 0) {
+      setSaving(false);
+      setDrafts([]);
+      setDone(
+        `Nenhuma transação nova: as ${skipped} do arquivo já estavam importadas.`
+      );
+      return;
+    }
+
+    const { error } = await supabase.from("transactions").insert(fresh);
     setSaving(false);
     if (error) {
       setError("Erro ao salvar: " + error.message);
     } else {
-      setDone(true);
+      setDone(
+        skipped > 0
+          ? `${fresh.length} transações importadas (${skipped} duplicadas ignoradas).`
+          : `${fresh.length} transações importadas com sucesso!`
+      );
       setDrafts([]);
       router.refresh();
     }
@@ -212,7 +240,7 @@ export function ImportClient() {
       {done && (
         <div className="glass flex items-center gap-2 p-4 text-sm text-accent-green">
           <Icon name="check" size={17} strokeWidth={2} />
-          Transações importadas com sucesso!
+          {done}
         </div>
       )}
 

@@ -30,8 +30,13 @@ export function AddTransactionForm() {
       return;
     }
     const value = parseFloat(amount.replace(",", "."));
-    if (!description || isNaN(value)) {
-      setMsg("Preencha descrição e valor.");
+    if (!description.trim() || isNaN(value) || value <= 0) {
+      setMsg("Preencha a descrição e um valor maior que zero.");
+      return;
+    }
+    const year = Number(date.slice(0, 4));
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || year < 2000 || year > new Date().getFullYear() + 1) {
+      setMsg("Data inválida.");
       return;
     }
 

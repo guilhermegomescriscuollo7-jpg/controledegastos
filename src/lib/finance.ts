@@ -71,6 +71,32 @@ export function summarize(
   };
 }
 
+const MESES_CURTO = [
+  "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+  "Jul", "Ago", "Set", "Out", "Nov", "Dez",
+];
+
+/** Gastos totais dos ultimos N meses terminando no mes pedido (comparativo). */
+export function monthlyExpenseTotals(
+  transactions: Transaction[],
+  endMonthKey = currentMonthKey(),
+  months = 6
+) {
+  const year = Number(endMonthKey.slice(0, 4));
+  const monthIdx = Number(endMonthKey.slice(5, 7)) - 1;
+
+  const out: { month: string; label: string; total: number }[] = [];
+  for (let i = months - 1; i >= 0; i--) {
+    const d = new Date(year, monthIdx - i, 1);
+    const key = currentMonthKey(d);
+    const total = transactions
+      .filter((t) => inMonth(t, key) && t.amount < 0)
+      .reduce((s, t) => s + Math.abs(t.amount), 0);
+    out.push({ month: key, label: MESES_CURTO[d.getMonth()], total });
+  }
+  return out;
+}
+
 /** Serie diaria acumulada de gastos no mes (para o grafico de area). */
 export function dailySpendSeries(
   transactions: Transaction[],

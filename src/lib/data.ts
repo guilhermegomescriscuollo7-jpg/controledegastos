@@ -1,4 +1,5 @@
 import { createClient } from "./supabase/server";
+import { currentMonthKey } from "./finance";
 import {
   DEMO_TRANSACTIONS,
   DEMO_BUDGETS,
@@ -18,8 +19,11 @@ export interface LoadedData {
 
 /**
  * Carrega dados do usuario logado. Sem Supabase ou sem login -> dados demo.
+ * A meta de economia e a do mes pedido; se nao houver, vale a mais recente
+ * anterior a ele (a meta "atual" continua valendo nos meses seguintes).
  */
-export async function loadData(): Promise<LoadedData> {
+export async function loadData(monthKey?: string): Promise<LoadedData> {
+  const month = monthKey ?? currentMonthKey();
   const supabase = await createClient();
 
   if (!supabase) {
@@ -55,7 +59,13 @@ export async function loadData(): Promise<LoadedData> {
         .select("*")
         .order("date", { ascending: false }),
       supabase.from("budgets").select("*"),
-      supabase.from("monthly_goals").select("*").limit(1).maybeSingle(),
+      supabase
+        .from("monthly_goals")
+        .select("*")
+        .lte("month", month)
+        .order("month", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
       supabase.from("profiles").select("monthly_salary").maybeSingle(),
     ]);
 

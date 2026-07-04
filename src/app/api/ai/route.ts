@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { CATEGORIES } from "@/lib/categories";
+import { createClient } from "@/lib/supabase/server";
 import type { FinanceSummary } from "@/lib/finance";
 
 export const runtime = "nodejs";
@@ -71,7 +72,28 @@ function ruleBasedAdvice(summary: FinanceSummary, savingsTarget: number) {
 }
 
 export async function POST(req: Request) {
-  const { summary, savingsTarget } = (await req.json()) as Body;
+  // Com Supabase configurado, so usuarios logados podem consumir a IA
+  // (nao depender apenas do middleware protege a chave da Anthropic).
+  const supabase = await createClient();
+  if (supabase) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    }
+  }
+
+  let body: Body;
+  try {
+    body = (await req.json()) as Body;
+  } catch {
+    return NextResponse.json({ error: "Corpo inválido" }, { status: 400 });
+  }
+  const { summary, savingsTarget } = body;
+  if (!summary || !Array.isArray(summary.byCategory) || !Array.isArray(summary.budgetStatus)) {
+    return NextResponse.json({ error: "Dados incompletos" }, { status: 400 });
+  }
 
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) {

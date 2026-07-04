@@ -22,6 +22,11 @@ export function SalaryEditor({
       setMsg("Entre na sua conta para salvar o salário.");
       return;
     }
+    const parsed = parseFloat(value.replace(",", "."));
+    if (value.trim() !== "" && (isNaN(parsed) || parsed < 0)) {
+      setMsg("Informe um valor válido (ou deixe vazio para zerar).");
+      return;
+    }
     setSaving(true);
     setMsg(null);
     const supabase = createClient();
@@ -36,7 +41,7 @@ export function SalaryEditor({
     const { error } = await supabase.from("profiles").upsert(
       {
         user_id: user.id,
-        monthly_salary: parseFloat(value.replace(",", ".")) || 0,
+        monthly_salary: isNaN(parsed) ? 0 : parsed,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "user_id" }

@@ -32,6 +32,17 @@ export function BudgetEditor({ budgets, savingsTarget, canEdit }: Props) {
       setMsg("Entre na sua conta para salvar os limites.");
       return;
     }
+    const invalid = EXPENSE_CATEGORIES.some((c) => {
+      const raw = (limits[c.key] || "").trim();
+      if (!raw) return false;
+      const n = parseFloat(raw.replace(",", "."));
+      return isNaN(n) || n < 0;
+    });
+    const targetNum = parseFloat(target.replace(",", "."));
+    if (invalid || (target.trim() !== "" && (isNaN(targetNum) || targetNum < 0))) {
+      setMsg("Confira os valores: use apenas números positivos.");
+      return;
+    }
     setSaving(true);
     setMsg(null);
     const supabase = createClient();

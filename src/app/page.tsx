@@ -1,5 +1,11 @@
 import { loadData } from "@/lib/data";
-import { summarize, dailySpendSeries, currentMonthKey } from "@/lib/finance";
+import {
+  summarize,
+  dailySpendSeries,
+  currentMonthKey,
+  monthlyExpenseTotals,
+} from "@/lib/finance";
+import { MonthlyCompare } from "@/components/MonthlyCompare";
 import { StatCard } from "@/components/StatCard";
 import { SpendingChart } from "@/components/SpendingChart";
 import { CategoryDonut } from "@/components/CategoryDonut";
@@ -26,9 +32,10 @@ export default async function DashboardPage({
   const monthKey = isValidMonthKey(month) ? month : currentMonthKey();
 
   const { transactions, budgets, savingsTarget, monthlySalary, demo, userEmail } =
-    await loadData();
+    await loadData(monthKey);
   const summary = summarize(transactions, budgets, monthKey, monthlySalary);
   const series = dailySpendSeries(transactions, monthKey);
+  const compare = monthlyExpenseTotals(transactions, monthKey);
   const saved = summary.balance > 0 ? summary.balance : 0;
   const savingsPct =
     savingsTarget > 0 ? Math.round((saved / savingsTarget) * 100) : 0;
@@ -100,6 +107,8 @@ export default async function DashboardPage({
         <SpendingChart data={series} />
         <CategoryDonut data={summary.byCategory} />
       </section>
+
+      <MonthlyCompare data={compare} selectedMonth={monthKey} />
 
       <BudgetList status={summary.budgetStatus} />
 

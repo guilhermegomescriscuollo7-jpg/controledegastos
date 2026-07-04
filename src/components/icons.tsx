@@ -27,6 +27,7 @@ export type IconName =
   | "edit"
   | "trash"
   | "file"
+  | "search"
   // categorias
   | "car"
   | "shield"
@@ -118,6 +119,12 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <path d="M7 3.5h7l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19V5A1.5 1.5 0 0 1 7 3.5Z" />
       <path d="M14 3.5V8h4M9 13h6M9 16h4" />
+    </>
+  ),
+  search: (
+    <>
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="M15.8 15.8 20.5 20.5" />
     </>
   ),
   "chevron-left": <path d="M14.5 6 8.5 12l6 6" />,
