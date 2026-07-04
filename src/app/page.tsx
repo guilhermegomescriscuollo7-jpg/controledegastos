@@ -4,8 +4,16 @@ import {
   dailySpendSeries,
   currentMonthKey,
   monthlyExpenseTotals,
+  weekdayTotals,
+  topExpenses,
+  accountTotals,
+  spendForecast,
 } from "@/lib/finance";
 import { MonthlyCompare } from "@/components/MonthlyCompare";
+import { WeekdayChart } from "@/components/WeekdayChart";
+import { TopExpenses } from "@/components/TopExpenses";
+import { AccountSplit } from "@/components/AccountSplit";
+import { ForecastCard } from "@/components/ForecastCard";
 import { StatCard } from "@/components/StatCard";
 import { SpendingChart } from "@/components/SpendingChart";
 import { CategoryDonut } from "@/components/CategoryDonut";
@@ -36,6 +44,10 @@ export default async function DashboardPage({
   const summary = summarize(transactions, budgets, monthKey, monthlySalary);
   const series = dailySpendSeries(transactions, monthKey);
   const compare = monthlyExpenseTotals(transactions, monthKey);
+  const weekdays = weekdayTotals(transactions, monthKey);
+  const biggest = topExpenses(transactions, monthKey);
+  const accounts = accountTotals(transactions, monthKey);
+  const forecast = spendForecast(transactions, monthKey);
   const saved = summary.balance > 0 ? summary.balance : 0;
   const savingsPct =
     savingsTarget > 0 ? Math.round((saved / savingsTarget) * 100) : 0;
@@ -109,6 +121,17 @@ export default async function DashboardPage({
       </section>
 
       <MonthlyCompare data={compare} selectedMonth={monthKey} />
+
+      {/* Analises do mes */}
+      <section className="grid gap-5 lg:grid-cols-2">
+        <ForecastCard forecast={forecast} income={summary.income} />
+        <AccountSplit data={accounts} />
+      </section>
+
+      <section className="grid gap-5 lg:grid-cols-2">
+        <WeekdayChart data={weekdays} />
+        <TopExpenses transactions={biggest} />
+      </section>
 
       <BudgetList status={summary.budgetStatus} />
 

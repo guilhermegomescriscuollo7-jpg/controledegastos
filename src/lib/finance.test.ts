@@ -4,6 +4,10 @@ import {
   summarize,
   dailySpendSeries,
   monthlyExpenseTotals,
+  weekdayTotals,
+  topExpenses,
+  accountTotals,
+  spendForecast,
 } from "./finance";
 import type { Transaction, Budget } from "./types";
 
@@ -98,5 +102,79 @@ describe("monthlyExpenseTotals", () => {
     );
     expect(out[5].total).toBe(50);
     expect(out[4].total).toBe(7);
+  });
+});
+
+describe("weekdayTotals", () => {
+  it("agrupa gastos pelo dia da semana", () => {
+    // 2026-07-01 é uma quarta-feira
+    const out = weekdayTotals(
+      [
+        tx({ date: "2026-07-01", amount: -10 }),
+        tx({ date: "2026-07-08", amount: -5 }), // outra quarta
+        tx({ date: "2026-07-03", amount: -7 }), // sexta
+        tx({ date: "2026-07-03", amount: 100 }), // receita fora
+      ],
+      "2026-07"
+    );
+    expect(out).toHaveLength(7);
+    expect(out[3]).toEqual({ label: "Qua", total: 15 });
+    expect(out[5]).toEqual({ label: "Sex", total: 7 });
+  });
+});
+
+describe("topExpenses", () => {
+  it("retorna os maiores gastos do mês em ordem decrescente", () => {
+    const out = topExpenses(
+      [
+        tx({ date: "2026-07-01", amount: -10 }),
+        tx({ date: "2026-07-02", amount: -300 }),
+        tx({ date: "2026-07-03", amount: -50 }),
+        tx({ date: "2026-06-01", amount: -999 }), // outro mês
+        tx({ date: "2026-07-04", amount: 500 }), // receita fora
+      ],
+      "2026-07",
+      2
+    );
+    expect(out.map((t) => t.amount)).toEqual([-300, -50]);
+  });
+});
+
+describe("accountTotals", () => {
+  it("agrupa por conta com percentual do total", () => {
+    const out = accountTotals(
+      [
+        tx({ date: "2026-07-01", amount: -75, account: "Nubank" }),
+        tx({ date: "2026-07-02", amount: -25, account: "Sicoob" }),
+        tx({ date: "2026-07-03", amount: -10, account: null }),
+      ],
+      "2026-07"
+    );
+    expect(out[0]).toEqual({ account: "Nubank", total: 75, pct: 75 / 110 });
+    expect(out[2].account).toBe("Sem conta");
+  });
+});
+
+describe("spendForecast", () => {
+  it("projeta o gasto do mês corrente pelo ritmo diário", () => {
+    const f = spendForecast(
+      [tx({ date: "2026-07-05", amount: -100 })],
+      "2026-07",
+      new Date(2026, 6, 10) // dia 10 de julho
+    );
+    expect(f.isCurrent).toBe(true);
+    expect(f.avgDaily).toBe(10);
+    expect(f.projected).toBe(310); // 10/dia * 31 dias
+  });
+
+  it("em mês passado usa o mês inteiro como base", () => {
+    const f = spendForecast(
+      [tx({ date: "2026-06-15", amount: -300 })],
+      "2026-06",
+      new Date(2026, 6, 10)
+    );
+    expect(f.isCurrent).toBe(false);
+    expect(f.avgDaily).toBe(10); // 300 / 30 dias
+    expect(f.projected).toBe(300);
   });
 });
