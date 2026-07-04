@@ -54,7 +54,7 @@ export default async function DashboardPage({
       </header>
 
       {/* Filtro de mês/ano */}
-      <div className="flex items-center justify-between">
+      <div className="relative z-20 flex items-center justify-between">
         <MonthPicker monthKey={monthKey} />
       </div>
 
