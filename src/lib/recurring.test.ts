@@ -1,5 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { addMonths, monthsToApply, ruleDateInMonth } from "./recurring";
+import {
+  addMonths,
+  monthsToApply,
+  ruleDateInMonth,
+  upcomingBills,
+} from "./recurring";
+import type { RecurringRule } from "./types";
+
+function rule(o: Partial<RecurringRule> & { day_of_month: number }): RecurringRule {
+  return {
+    id: Math.random().toString(36).slice(2),
+    description: "Conta",
+    amount: -100,
+    category: "outros",
+    account: null,
+    active: true,
+    applied_until: null,
+    ...o,
+  };
+}
 
 describe("addMonths", () => {
   it("soma e subtrai meses cruzando a virada de ano", () => {
@@ -44,5 +63,34 @@ describe("ruleDateInMonth", () => {
   it("limita o dia entre 1 e 28", () => {
     expect(ruleDateInMonth("2026-02", 31)).toBe("2026-02-28");
     expect(ruleDateInMonth("2026-02", 0)).toBe("2026-02-01");
+  });
+});
+
+describe("upcomingBills", () => {
+  it("calcula o próximo vencimento e ordena por data", () => {
+    const today = new Date(2026, 6, 10); // 10/jul
+    const bills = upcomingBills(
+      [
+        rule({ id: "a", day_of_month: 5, amount: -200 }), // dia 5 já passou -> 05/ago
+        rule({ id: "b", day_of_month: 15, amount: -100 }), // dia 15 -> 15/jul
+      ],
+      today
+    );
+    expect(bills.map((b) => b.rule.id)).toEqual(["b", "a"]);
+    expect(bills[0].dueDate).toBe("2026-07-15");
+    expect(bills[0].daysUntil).toBe(5);
+    expect(bills[1].dueDate).toBe("2026-08-05");
+  });
+
+  it("ignora recorrentes de receita e inativas", () => {
+    const today = new Date(2026, 6, 10);
+    const bills = upcomingBills(
+      [
+        rule({ day_of_month: 20, amount: 500 }), // receita
+        rule({ day_of_month: 20, amount: -50, active: false }), // inativa
+      ],
+      today
+    );
+    expect(bills).toHaveLength(0);
   });
 });

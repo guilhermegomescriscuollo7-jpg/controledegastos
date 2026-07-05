@@ -7,7 +7,22 @@ import {
   DEMO_SAVINGS_TARGET,
   DEMO_SALARY,
 } from "./demo";
-import type { Transaction, Budget } from "./types";
+import type { Transaction, Budget, RecurringRule } from "./types";
+
+/** Regras recorrentes do usuário logado (vazio em demo/sem login). */
+export async function loadRecurringRules(): Promise<RecurringRule[]> {
+  const supabase = await createClient();
+  if (!supabase) return [];
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data } = await supabase
+    .from("recurring_rules")
+    .select("*")
+    .order("day_of_month", { ascending: true });
+  return (data as RecurringRule[]) ?? [];
+}
 
 export interface LoadedData {
   transactions: Transaction[];

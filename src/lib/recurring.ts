@@ -9,6 +9,42 @@ export function addMonths(monthKey: string, n: number): string {
   return currentMonthKey(new Date(year, monthIdx + n, 1));
 }
 
+export interface UpcomingBill {
+  rule: RecurringRule;
+  dueDate: string; // ISO yyyy-mm-dd do próximo vencimento
+  daysUntil: number; // dias a partir de hoje (0 = hoje)
+}
+
+/**
+ * Próximos vencimentos das recorrentes de despesa (contas a pagar),
+ * a partir de hoje, ordenados por data. `withinDays` limita a janela.
+ */
+export function upcomingBills(
+  rules: RecurringRule[],
+  today = new Date(),
+  withinDays = 45
+): UpcomingBill[] {
+  const base = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const out: UpcomingBill[] = [];
+
+  for (const rule of rules) {
+    if (!rule.active || rule.amount >= 0) continue; // só contas (despesas)
+    const day = Math.min(Math.max(rule.day_of_month, 1), 28);
+
+    // próximo vencimento: este mês se ainda não passou, senão mês que vem
+    let due = new Date(base.getFullYear(), base.getMonth(), day);
+    if (due < base) due = new Date(base.getFullYear(), base.getMonth() + 1, day);
+
+    const daysUntil = Math.round((due.getTime() - base.getTime()) / 86400000);
+    if (daysUntil > withinDays) continue;
+
+    const iso = `${due.getFullYear()}-${String(due.getMonth() + 1).padStart(2, "0")}-${String(due.getDate()).padStart(2, "0")}`;
+    out.push({ rule, dueDate: iso, daysUntil });
+  }
+
+  return out.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+}
+
 /**
  * Meses em que uma regra ainda precisa ser lançada, do mês seguinte ao
  * último aplicado (ou do mês de criação da regra) até o mês atual.

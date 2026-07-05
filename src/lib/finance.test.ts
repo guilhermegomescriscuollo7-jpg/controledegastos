@@ -11,6 +11,8 @@ import {
   prevMonthKey,
   categoryDeltas,
   financialHealthScore,
+  detectInstallments,
+  detectSubscriptions,
 } from "./finance";
 import type { Transaction, Budget } from "./types";
 
@@ -244,5 +246,53 @@ describe("financialHealthScore", () => {
     const h = financialHealthScore(summary, 500);
     expect(h.score).toBeLessThan(40);
     expect(h.label).toBe("Crítica");
+  });
+});
+
+describe("detectInstallments", () => {
+  it("agrupa parcelas da mesma compra e calcula o que falta", () => {
+    const txs = [
+      tx({ date: "2026-05-10", amount: -100, description: "Inova Imports - Parcela 1/12", category: "parcelados" }),
+      tx({ date: "2026-06-10", amount: -100, description: "Inova Imports - Parcela 2/12", category: "parcelados" }),
+      tx({ date: "2026-07-10", amount: -100, description: "Inova Imports - Parcela 3/12", category: "parcelados" }),
+    ];
+    const plans = detectInstallments(txs);
+    expect(plans).toHaveLength(1);
+    expect(plans[0]).toMatchObject({
+      description: "Inova Imports",
+      current: 3,
+      total: 12,
+      remaining: 9,
+      remainingValue: 900,
+    });
+  });
+
+  it("ignora parcelamento já quitado", () => {
+    const txs = [
+      tx({ date: "2026-07-10", amount: -50, description: "Loja X Parcela 10/10", category: "parcelados" }),
+    ];
+    expect(detectInstallments(txs)).toHaveLength(0);
+  });
+});
+
+describe("detectSubscriptions", () => {
+  it("acha cobrança recorrente em meses diferentes com valor parecido", () => {
+    const txs = [
+      tx({ date: "2026-05-03", amount: -55.9, description: "Netflix.com", category: "assinaturas" }),
+      tx({ date: "2026-06-03", amount: -55.9, description: "Netflix.com", category: "assinaturas" }),
+      tx({ date: "2026-07-03", amount: -55.9, description: "Netflix.com", category: "assinaturas" }),
+      tx({ date: "2026-07-04", amount: -20, description: "Padaria do Bairro", category: "mercado" }),
+    ];
+    const subs = detectSubscriptions(txs);
+    expect(subs).toHaveLength(1);
+    expect(subs[0].amount).toBeCloseTo(55.9);
+    expect(subs[0].months).toBe(3);
+  });
+
+  it("não marca compra única como assinatura", () => {
+    const txs = [
+      tx({ date: "2026-07-01", amount: -99, description: "Loja Aleatoria Qualquer", category: "compras" }),
+    ];
+    expect(detectSubscriptions(txs)).toHaveLength(0);
   });
 });

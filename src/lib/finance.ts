@@ -8,6 +8,15 @@ export function inMonth(t: Transaction, monthKey: string) {
   return t.date.startsWith(monthKey);
 }
 
+function norm(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export interface FinanceSummary {
   income: number;
   expenses: number; // valor positivo
@@ -307,4 +316,158 @@ export function dailySpendSeries(
     series.push({ day: String(d), gasto, acumulado: acc });
   }
   return series;
+}
+
+// ======================= Parcelados =======================
+
+export interface InstallmentPlan {
+  key: string;
+  description: string; // nome base da compra
+  category: CategoryKey;
+  current: number; // parcela atual (maior X visto)
+  total: number; // total de parcelas (Y)
+  amount: number; // valor de cada parcela
+  remaining: number; // parcelas que faltam
+  remainingValue: number; // quanto ainda vai pesar
+  lastDate: string;
+}
+
+// "Parcela 4/12", "PARC. 03/10", "Parc 4/12"
+const PARCELA_RE = /parc\w*\.?\s*(\d{1,2})\s*\/\s*(\d{1,2})/i;
+
+/**
+ * Detecta compras parceladas a partir das descrições (X de Y) e mostra
+ * o progresso e quanto ainda falta pagar. Best-effort.
+ */
+export function detectInstallments(
+  transactions: Transaction[]
+): InstallmentPlan[] {
+  const groups = new Map<
+    string,
+    { current: number; total: number; amount: number; date: string; category: CategoryKey; label: string }[]
+  >();
+
+  for (const t of transactions) {
+    if (t.amount >= 0) continue;
+    const m = t.description.match(PARCELA_RE);
+    if (!m) continue;
+    const current = Number(m[1]);
+    const total = Number(m[2]);
+    if (!total || total < 2 || total > 60 || current < 1 || current > total) continue;
+
+    // Nome base: descrição sem o trecho da parcela e sem sufixos de detalhe.
+    const label = t.description
+      .replace(PARCELA_RE, "")
+      .replace(/[·|].*/, "")
+      .replace(/\s{2,}/g, " ")
+      .replace(/^[\s·|—-]+|[\s·|—-]+$/g, "")
+      .trim();
+    const key = `${norm(label)}#${total}`;
+
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push({
+      current,
+      total,
+      amount: Math.abs(t.amount),
+      date: t.date,
+      category: t.category,
+      label: label || t.description,
+    });
+  }
+
+  const plans: InstallmentPlan[] = [];
+  for (const [key, items] of groups) {
+    items.sort((a, b) => a.date.localeCompare(b.date));
+    const last = items[items.length - 1];
+    const total = last.total;
+    const current = Math.max(...items.map((i) => i.current));
+    const remaining = total - current;
+    if (remaining <= 0) continue;
+    plans.push({
+      key,
+      description: last.label,
+      category: last.category,
+      current,
+      total,
+      amount: last.amount,
+      remaining,
+      remainingValue: remaining * last.amount,
+      lastDate: last.date,
+    });
+  }
+
+  return plans.sort((a, b) => b.remainingValue - a.remainingValue);
+}
+
+// ======================= Assinaturas =======================
+
+export interface Subscription {
+  key: string;
+  name: string;
+  category: CategoryKey;
+  amount: number; // valor mensal típico
+  months: number; // meses distintos em que apareceu
+  lastDate: string;
+}
+
+/** Chave de comerciante: primeiras palavras significativas, sem números. */
+function merchantKey(desc: string): string {
+  return norm(desc)
+    .replace(/[0-9./*#-]+/g, " ")
+    .split(" ")
+    .filter((w) => w.length >= 3)
+    .slice(0, 3)
+    .join(" ")
+    .trim();
+}
+
+/**
+ * Encontra cobranças recorrentes (assinaturas): mesma origem em 2+ meses
+ * distintos com valor parecido. Retorna ordenado pelo valor.
+ */
+export function detectSubscriptions(
+  transactions: Transaction[]
+): Subscription[] {
+  const groups = new Map<
+    string,
+    { amount: number; month: string; date: string; category: CategoryKey }[]
+  >();
+
+  for (const t of transactions) {
+    if (t.amount >= 0) continue;
+    const key = merchantKey(t.description);
+    if (key.length < 3) continue;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push({
+      amount: Math.abs(t.amount),
+      month: t.date.slice(0, 7),
+      date: t.date,
+      category: t.category,
+    });
+  }
+
+  const subs: Subscription[] = [];
+  for (const [key, items] of groups) {
+    const months = new Set(items.map((i) => i.month));
+    if (months.size < 2) continue; // precisa se repetir em meses diferentes
+
+    const amounts = items.map((i) => i.amount);
+    const avg = amounts.reduce((s, v) => s + v, 0) / amounts.length;
+    const spread = Math.max(...amounts) - Math.min(...amounts);
+    // valores consistentes (variação até 20% da média) = assinatura
+    if (avg <= 0 || spread > avg * 0.2) continue;
+
+    items.sort((a, b) => a.date.localeCompare(b.date));
+    const last = items[items.length - 1];
+    subs.push({
+      key,
+      name: key.replace(/\b\w/g, (c) => c.toUpperCase()),
+      category: last.category,
+      amount: Math.round(avg * 100) / 100,
+      months: months.size,
+      lastDate: last.date,
+    });
+  }
+
+  return subs.sort((a, b) => b.amount - a.amount);
 }

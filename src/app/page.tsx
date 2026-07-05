@@ -1,4 +1,4 @@
-import { loadData } from "@/lib/data";
+import { loadData, loadRecurringRules } from "@/lib/data";
 import {
   summarize,
   dailySpendSeries,
@@ -10,7 +10,13 @@ import {
   spendForecast,
   categoryDeltas,
   financialHealthScore,
+  detectInstallments,
+  detectSubscriptions,
 } from "@/lib/finance";
+import { upcomingBills } from "@/lib/recurring";
+import { UpcomingBills } from "@/components/UpcomingBills";
+import { InstallmentTracker } from "@/components/InstallmentTracker";
+import { SubscriptionsPanel } from "@/components/SubscriptionsPanel";
 import { MonthlyCompare } from "@/components/MonthlyCompare";
 import { WeekdayChart } from "@/components/WeekdayChart";
 import { TopExpenses } from "@/components/TopExpenses";
@@ -43,8 +49,10 @@ export default async function DashboardPage({
   const { month } = await searchParams;
   const monthKey = isValidMonthKey(month) ? month : currentMonthKey();
 
-  const { transactions, budgets, savingsTarget, monthlySalary, demo, userEmail } =
-    await loadData(monthKey, 12);
+  const [
+    { transactions, budgets, savingsTarget, monthlySalary, demo, userEmail },
+    rules,
+  ] = await Promise.all([loadData(monthKey, 12), loadRecurringRules()]);
   const summary = summarize(transactions, budgets, monthKey, monthlySalary);
   const series = dailySpendSeries(transactions, monthKey);
   const compare = monthlyExpenseTotals(transactions, monthKey);
@@ -55,6 +63,9 @@ export default async function DashboardPage({
   const deltas = categoryDeltas(transactions, monthKey);
   const health = financialHealthScore(summary, savingsTarget);
   const topExpense = biggest[0];
+  const bills = upcomingBills(rules);
+  const installments = detectInstallments(transactions);
+  const subscriptions = detectSubscriptions(transactions);
   const saved = summary.balance > 0 ? summary.balance : 0;
   const savingsPct =
     savingsTarget > 0 ? Math.round((saved / savingsTarget) * 100) : 0;
@@ -158,6 +169,17 @@ export default async function DashboardPage({
         />
         <HealthGauge health={health} />
       </section>
+
+      {/* Contas a pagar + parcelados */}
+      {(bills.length > 0 || installments.length > 0) && (
+        <section className="grid gap-5 lg:grid-cols-2">
+          <UpcomingBills bills={bills} />
+          <InstallmentTracker plans={installments} />
+        </section>
+      )}
+
+      {/* Assinaturas detectadas */}
+      {subscriptions.length > 0 && <SubscriptionsPanel subs={subscriptions} />}
 
       {/* Graficos */}
       <section className="grid gap-5 lg:grid-cols-2">
