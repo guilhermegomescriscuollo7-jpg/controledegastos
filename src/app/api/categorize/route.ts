@@ -76,6 +76,7 @@ export async function POST(req: Request) {
         "- lazer: cinema, shows, viagens, hotéis, jogos.\n" +
         "- educacao: escola, faculdade, cursos, livraria.\n" +
         "- pet: petshop, veterinário, ração.\n" +
+        "- parcelados: compras parceladas / crediário, quando a descrição indica parcela (ex.: 'Parcela 3/10', 'em 12x') e NÃO é do carro.\n" +
         "- cartao: compras genéricas no cartão quando não houver categoria melhor.\n" +
         "- outros: só quando realmente não der para inferir nada.\n" +
         "Responda APENAS com um array JSON de strings, sem markdown, com exatamente " +

@@ -44,6 +44,7 @@ export type IconName =
   | "ticket"
   | "book"
   | "paw"
+  | "layers"
   | "dots"
   | "wallet";
 
@@ -243,6 +244,13 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M12.4 11.8c-2.4 0-4.3 1.7-4.3 3.8 0 1.6 1.3 2.4 2.7 2.4.9 0 1.1-.3 1.6-.3s.7.3 1.6.3c1.4 0 2.7-.8 2.7-2.4 0-2.1-1.9-3.8-4.3-3.8Z" fill="currentColor" stroke="none" />
     </>
   ),
+  layers: (
+    <>
+      <path d="M12 3.5 3.5 8 12 12.5 20.5 8 12 3.5Z" />
+      <path d="M3.5 12 12 16.5 20.5 12" />
+      <path d="M3.5 16 12 20.5 20.5 16" />
+    </>
+  ),
   dots: (
     <>
       <circle cx="6" cy="12" r="1.3" fill="currentColor" stroke="none" />
@@ -308,6 +316,7 @@ export const CATEGORY_ICON: Record<CategoryKey, IconName> = {
   lazer: "ticket",
   educacao: "book",
   pet: "paw",
+  parcelados: "layers",
   outros: "dots",
   receita: "wallet",
 };

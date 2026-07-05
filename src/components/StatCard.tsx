@@ -1,5 +1,5 @@
-import { BRL } from "@/lib/categories";
 import { Icon, type IconName } from "@/components/icons";
+import { AnimatedNumber } from "@/components/AnimatedNumber";
 
 interface Props {
   label: string;
@@ -25,12 +25,11 @@ export function StatCard({ label, value, accent = "var(--accent)", sub, icon }: 
           </span>
         )}
       </div>
-      <div
-        className="mt-2.5 text-2xl font-semibold tracking-tight sm:text-[28px]"
+      <AnimatedNumber
+        value={value}
+        className="mt-2.5 block text-2xl font-semibold tracking-tight sm:text-[28px]"
         style={{ color: accent }}
-      >
-        {BRL.format(value)}
-      </div>
+      />
       {sub && <div className="text-dim mt-1 text-xs">{sub}</div>}
     </div>
   );

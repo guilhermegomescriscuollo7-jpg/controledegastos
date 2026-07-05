@@ -23,6 +23,7 @@ export const CATEGORIES: Record<CategoryKey, CategoryMeta> = {
   lazer: { key: "lazer", label: "Lazer", color: "#cf6fff" },
   educacao: { key: "educacao", label: "Educação", color: "#7d7aff" },
   pet: { key: "pet", label: "Pet", color: "#a2845e" },
+  parcelados: { key: "parcelados", label: "Parcelados", color: "#6d8cff" },
   outros: { key: "outros", label: "Outros", color: "#98989d" },
   receita: { key: "receita", label: "Receita", color: "#34c759" },
 };
@@ -72,6 +73,13 @@ const CATEGORY_RULES: [RegExp, CategoryKey][] = [
   [
     /financiamento.*(carro|veic|auto)|consorcio.*(carro|veic|auto)|(parcela|prestacao|leasing).*(carro|veic|auto)|financiamento (do )?(carro|veiculo)|banco.*(carro|veiculo)/,
     "financiamento_carro",
+  ],
+  // Parcelados / crediário (compra parcelada, ex.: "Parcela 3/10").
+  // Depois do carro (parcela do carro tem prioridade), mas antes das
+  // categorias de loja — o usuário quer ver o parcelado agrupado.
+  [
+    /parcelad|\bparcela\b|em \d+ ?x\b|\d+ ?x de\b|crediario|carne de loja/,
+    "parcelados",
   ],
   // Academia
   [
@@ -130,7 +138,7 @@ const CATEGORY_RULES: [RegExp, CategoryKey][] = [
   ],
   // Cartão — pagamentos de fatura / crédito explícito
   [
-    /\bfatura\b|pagamento de fatura|anuidade|pix no credito|pix parcelado/,
+    /\bfatura\b|pagamento de fatura|anuidade|pix no credito/,
     "cartao",
   ],
 ];

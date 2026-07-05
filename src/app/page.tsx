@@ -52,12 +52,30 @@ export default async function DashboardPage({
   const savingsPct =
     savingsTarget > 0 ? Math.round((saved / savingsTarget) * 100) : 0;
 
+  // Saudação pelo horário de Brasília (o app é dinâmico, recalcula por request).
+  const hourBR = Number(
+    new Intl.DateTimeFormat("pt-BR", {
+      hour: "numeric",
+      hour12: false,
+      timeZone: "America/Sao_Paulo",
+    }).format(new Date())
+  );
+  const greeting =
+    hourBR < 6
+      ? "Boa madrugada"
+      : hourBR < 12
+      ? "Bom dia"
+      : hourBR < 18
+      ? "Boa tarde"
+      : "Boa noite";
+
   return (
     <main className="space-y-5">
       <header className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight sm:text-[32px]">
-            Olá{userEmail ? `, ${userEmail.split("@")[0]}` : ""}
+            {greeting}
+            {userEmail ? `, ${userEmail.split("@")[0]}` : ""}
           </h1>
           <p className="text-dim mt-0.5 text-sm">Seu resumo financeiro</p>
         </div>

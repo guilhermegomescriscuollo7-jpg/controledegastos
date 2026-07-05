@@ -15,6 +15,7 @@ export type CategoryKey =
   | "lazer"
   | "educacao"
   | "pet"
+  | "parcelados"
   | "outros"
   | "receita";
 

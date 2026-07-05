@@ -102,4 +102,13 @@ describe("guessCategory", () => {
     expect(guessCategory("Faculdade Mensalidade")).toBe("educacao");
     expect(guessCategory("Petz Racao")).toBe("pet");
   });
+
+  it("parcelados (com carro tendo prioridade)", () => {
+    expect(guessCategory("Inova Imports - Parcela 4/12")).toBe("parcelados");
+    expect(guessCategory("Compra parcelada em 10x")).toBe("parcelados");
+    expect(guessCategory("Magazine Luiza - Parcela 2/6")).toBe("parcelados");
+    expect(guessCategory("Financiamento Santander - Parcela carro")).toBe(
+      "financiamento_carro"
+    );
+  });
 });
