@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { parseAmount, parseDate, findAmountInLine } from "./parse";
+import {
+  parseAmount,
+  parseDate,
+  findAmountInLine,
+  findStatementAmount,
+} from "./parse";
 
 describe("parseAmount", () => {
   it("entende formato brasileiro com milhar e centavos", () => {
@@ -46,6 +51,36 @@ describe("parseDate", () => {
   it("retorna null quando não reconhece", () => {
     expect(parseDate("ontem")).toBeNull();
     expect(parseDate("")).toBeNull();
+  });
+
+  it("entende dd/mm sem ano usando o ano de fallback (extrato Sicoob)", () => {
+    expect(parseDate("01/06 COMPRA CARTAO", 2026)).toBe("2026-06-01");
+  });
+
+  it("ignora dd/mm quando não há ano de fallback", () => {
+    expect(parseDate("01/06 COMPRA CARTAO")).toBeNull();
+  });
+
+  it("prioriza data completa mesmo com fallback", () => {
+    expect(parseDate("05/06/2025 PIX", 2026)).toBe("2025-06-05");
+  });
+});
+
+describe("findStatementAmount (extrato com D/C)", () => {
+  it("débito (D) vira negativo", () => {
+    expect(findStatementAmount("COMPRA CARTAO 50,00 D")).toBe(-50);
+  });
+
+  it("crédito (C) vira positivo", () => {
+    expect(findStatementAmount("PIX RECEBIDO 1.234,56 C")).toBe(1234.56);
+  });
+
+  it("valor sem separador de milhar", () => {
+    expect(findStatementAmount("PAGAMENTO 1234,56 D")).toBe(-1234.56);
+  });
+
+  it("retorna null sem valor monetário", () => {
+    expect(findStatementAmount("SALDO ANTERIOR")).toBeNull();
   });
 });
 

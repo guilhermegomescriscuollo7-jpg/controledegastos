@@ -36,6 +36,7 @@ export function ImportClient() {
   const [done, setDone] = useState<string | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
   const [aiApplied, setAiApplied] = useState(false);
+  const [diag, setDiag] = useState<string[] | null>(null);
 
   /**
    * Mostra os rascunhos com as categorias por regras e, em paralelo,
@@ -86,6 +87,7 @@ export function ImportClient() {
   function onFile(file: File) {
     setError(null);
     setDone(null);
+    setDiag(null);
     setDrafts([]);
     const isPdf =
       file.type === "application/pdf" || /\.pdf$/i.test(file.name);
@@ -96,12 +98,21 @@ export function ImportClient() {
   async function handlePdf(file: File) {
     setParsing(true);
     try {
-      const { drafts: raw, linesRead } = await parsePdfTransactions(file);
+      const { drafts: raw, linesRead, sample } = await parsePdfTransactions(file);
       if (!raw.length) {
-        setError(
-          `Li ${linesRead} linhas do PDF, mas não reconheci transações (data + valor). ` +
-            "Alguns PDFs são imagem escaneada e não têm texto — nesse caso, tente o CSV."
-        );
+        if (linesRead === 0) {
+          setError(
+            "Não consegui extrair texto do PDF. Ele pode ser uma imagem " +
+              "escaneada (sem texto). Tente exportar de novo pelo app do banco."
+          );
+        } else {
+          setError(
+            `Li ${linesRead} linhas do PDF, mas não reconheci as transações. ` +
+              "Veja abaixo as primeiras linhas lidas e me mande um print — assim " +
+              "eu ajusto a leitura para o formato do seu banco."
+          );
+          setDiag(sample);
+        }
         return;
       }
       await finishParsing(
@@ -283,6 +294,16 @@ export function ImportClient() {
       {error && (
         <div className="glass border-accent-red/40 p-4 text-sm text-accent-red">
           {error}
+        </div>
+      )}
+      {diag && diag.length > 0 && (
+        <div className="glass p-4">
+          <p className="text-dim mb-2 text-xs font-medium uppercase tracking-wide">
+            Primeiras linhas lidas do PDF
+          </p>
+          <pre className="text-dim max-h-64 overflow-auto whitespace-pre-wrap break-words text-xs leading-relaxed">
+            {diag.map((l, i) => `${String(i + 1).padStart(2, "0")}  ${l}`).join("\n")}
+          </pre>
         </div>
       )}
       {done && (

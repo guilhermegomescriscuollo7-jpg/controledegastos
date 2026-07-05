@@ -1,4 +1,4 @@
-import { parseDate, findAmountInLine } from "./parse";
+import { parseDate, findStatementAmount } from "./parse";
 
 /**
  * Extrai as linhas de texto de um PDF, preservando a ordem de leitura
@@ -60,26 +60,56 @@ export interface PdfDraft {
   amount: number;
 }
 
+// Linhas que são saldo/total/cabeçalho — não viram transação.
+const SKIP_LINE =
+  /\bsaldo\b|s\s*a\s*l\s*d\s*o|\btotal\b|limite\s*dispon|saldo\s*anterior|saldo\s*do\s*dia|resumo|lan[çc]amentos\s*futuros/i;
+
+/** Descobre o ano do extrato (para datas dd/mm sem ano). */
+function detectYear(lines: string[]): number {
+  for (const l of lines) {
+    const m = l.match(/\/(\d{4})\b/) || l.match(/\b(20\d{2})\b/);
+    if (m) return Number(m[1]);
+  }
+  return new Date().getFullYear();
+}
+
 /**
  * Lê um extrato/fatura em PDF e devolve possíveis transações.
- * Best-effort: procura, em cada linha, uma data + um valor monetário.
+ *
+ * Robusto para dois layouts comuns:
+ *  - data + valor na mesma linha (faturas Nubank e afins);
+ *  - data num cabeçalho do dia e os lançamentos abaixo só com
+ *    descrição + valor (extrato Sicoob) — a data é "carregada" para
+ *    as linhas seguintes até aparecer outra.
+ * Considera o sufixo D/C (débito/crédito) do Sicoob.
  */
 export async function parsePdfTransactions(file: File): Promise<{
   drafts: PdfDraft[];
   linesRead: number;
+  sample: string[];
 }> {
   const lines = await extractLines(file);
   const drafts: PdfDraft[] = [];
+  const year = detectYear(lines);
+  let currentDate: string | null = null;
 
   for (const line of lines) {
-    const date = parseDate(line);
-    const amount = findAmountInLine(line);
-    if (!date || amount === null || amount === 0) continue;
+    const lineDate = parseDate(line, year);
+    if (lineDate) currentDate = lineDate;
 
-    // Descrição = linha sem a data e sem os valores monetários.
+    if (SKIP_LINE.test(line)) continue;
+
+    const amount = findStatementAmount(line);
+    if (amount === null || amount === 0) continue;
+
+    const date = lineDate ?? currentDate;
+    if (!date) continue;
+
+    // Descrição = linha sem a data e sem os valores monetários (com D/C).
     const description = line
       .replace(/\d{2}\/\d{2}\/\d{2,4}/g, "")
-      .replace(/-?\(?\s*R?\$?\s*\d{1,3}(?:\.\d{3})*,\d{2}\)?-?/g, "")
+      .replace(/(?:^|\s)\d{2}\/\d{2}(?![\/\d])/g, " ")
+      .replace(/-?\(?\s*R?\$?\s*(?:\d{1,3}(?:\.\d{3})+|\d+),\d{2}\)?\s*[DC]?-?/gi, "")
       .replace(/\s{2,}/g, " ")
       .replace(/^[\s·|—-]+|[\s·|—-]+$/g, "")
       .trim();
@@ -88,5 +118,7 @@ export async function parsePdfTransactions(file: File): Promise<{
     drafts.push({ date, description, amount });
   }
 
-  return { drafts, linesRead: lines.length };
+  // Amostra das primeiras linhas para diagnóstico quando nada é reconhecido.
+  const sample = lines.filter((l) => l.trim().length > 0).slice(0, 12);
+  return { drafts, linesRead: lines.length, sample };
 }
