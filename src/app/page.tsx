@@ -8,12 +8,16 @@ import {
   topExpenses,
   accountTotals,
   spendForecast,
+  categoryDeltas,
+  financialHealthScore,
 } from "@/lib/finance";
 import { MonthlyCompare } from "@/components/MonthlyCompare";
 import { WeekdayChart } from "@/components/WeekdayChart";
 import { TopExpenses } from "@/components/TopExpenses";
 import { AccountSplit } from "@/components/AccountSplit";
 import { ForecastCard } from "@/components/ForecastCard";
+import { SmartInsights } from "@/components/SmartInsights";
+import { HealthGauge } from "@/components/HealthGauge";
 import { StatCard } from "@/components/StatCard";
 import { SpendingChart } from "@/components/SpendingChart";
 import { CategoryDonut } from "@/components/CategoryDonut";
@@ -48,6 +52,9 @@ export default async function DashboardPage({
   const biggest = topExpenses(transactions, monthKey);
   const accounts = accountTotals(transactions, monthKey);
   const forecast = spendForecast(transactions, monthKey);
+  const deltas = categoryDeltas(transactions, monthKey);
+  const health = financialHealthScore(summary, savingsTarget);
+  const topExpense = biggest[0];
   const saved = summary.balance > 0 ? summary.balance : 0;
   const savingsPct =
     savingsTarget > 0 ? Math.round((saved / savingsTarget) * 100) : 0;
@@ -131,6 +138,26 @@ export default async function DashboardPage({
 
       {/* IA */}
       <AIAdvisor summary={summary} savingsTarget={savingsTarget} />
+
+      {/* Análise inteligente + saúde financeira */}
+      <section className="grid gap-5 lg:grid-cols-2">
+        <SmartInsights
+          deltas={deltas}
+          balance={summary.balance}
+          savingsTarget={savingsTarget}
+          forecast={forecast}
+          topExpense={
+            topExpense
+              ? {
+                  description: topExpense.description,
+                  amount: topExpense.amount,
+                  category: topExpense.category,
+                }
+              : undefined
+          }
+        />
+        <HealthGauge health={health} />
+      </section>
 
       {/* Graficos */}
       <section className="grid gap-5 lg:grid-cols-2">

@@ -8,6 +8,9 @@ import {
   topExpenses,
   accountTotals,
   spendForecast,
+  prevMonthKey,
+  categoryDeltas,
+  financialHealthScore,
 } from "./finance";
 import type { Transaction, Budget } from "./types";
 
@@ -176,5 +179,70 @@ describe("spendForecast", () => {
     expect(f.isCurrent).toBe(false);
     expect(f.avgDaily).toBe(10); // 300 / 30 dias
     expect(f.projected).toBe(300);
+  });
+});
+
+describe("prevMonthKey", () => {
+  it("mês anterior, cruzando a virada de ano", () => {
+    expect(prevMonthKey("2026-01")).toBe("2025-12");
+    expect(prevMonthKey("2026-07")).toBe("2026-06");
+  });
+});
+
+describe("categoryDeltas", () => {
+  it("compara os gastos por categoria com o mês anterior", () => {
+    const txs = [
+      tx({ date: "2026-07-01", amount: -100, category: "mercado" }),
+      tx({ date: "2026-06-10", amount: -60, category: "mercado" }),
+      tx({ date: "2026-06-11", amount: -30, category: "combustivel" }),
+      tx({ date: "2026-07-05", amount: 500, category: "receita" }), // receita não conta
+    ];
+    const d = categoryDeltas(txs, "2026-07");
+    const merc = d.find((x) => x.category === "mercado")!;
+    expect(merc.current).toBe(100);
+    expect(merc.previous).toBe(60);
+    expect(merc.diff).toBe(40);
+    expect(merc.pct).toBeCloseTo(40 / 60);
+    const comb = d.find((x) => x.category === "combustivel")!;
+    expect(comb.current).toBe(0);
+    expect(comb.diff).toBe(-30);
+    expect(comb.pct).toBeCloseTo(-1); // gastava antes, agora zero => -100%
+  });
+
+  it("pct é null quando não havia gasto na categoria no mês anterior", () => {
+    const d = categoryDeltas(
+      [tx({ date: "2026-07-01", amount: -40, category: "lazer" })],
+      "2026-07"
+    );
+    const lazer = d.find((x) => x.category === "lazer")!;
+    expect(lazer.previous).toBe(0);
+    expect(lazer.pct).toBeNull();
+  });
+});
+
+describe("financialHealthScore", () => {
+  it("nota excelente quando poupa bem e dentro dos limites", () => {
+    const summary = summarize(
+      [tx({ date: "2026-07-01", amount: -200, category: "mercado" })],
+      [{ category: "mercado", monthly_limit: 500 }],
+      "2026-07",
+      2000
+    );
+    const h = financialHealthScore(summary, 500);
+    expect(h.score).toBeGreaterThanOrEqual(80);
+    expect(h.label).toBe("Excelente");
+    expect(h.parts).toHaveLength(3);
+  });
+
+  it("nota crítica com saldo negativo e limite estourado", () => {
+    const summary = summarize(
+      [tx({ date: "2026-07-01", amount: -3000, category: "mercado" })],
+      [{ category: "mercado", monthly_limit: 500 }],
+      "2026-07",
+      1000
+    );
+    const h = financialHealthScore(summary, 500);
+    expect(h.score).toBeLessThan(40);
+    expect(h.label).toBe("Crítica");
   });
 });
