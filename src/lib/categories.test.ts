@@ -9,8 +9,8 @@ describe("guessCategory", () => {
   });
 
   it("NÃO confunde restaurante/espetinho com posto", () => {
-    expect(guessCategory("Pit Stop do Espeto Gle")).toBe("cartao");
-    expect(guessCategory("Espetinho do Zé")).toBe("cartao");
+    expect(guessCategory("Pit Stop do Espeto Gle")).not.toBe("combustivel");
+    expect(guessCategory("Espetinho do Zé")).not.toBe("combustivel");
   });
 
   it("streaming vai para assinaturas, não para internet (bug do 'net')", () => {
@@ -60,8 +60,46 @@ describe("guessCategory", () => {
     expect(guessCategory("Estorno de compra")).toBe("receita");
   });
 
-  it("compra genérica desconhecida cai em cartão", () => {
-    expect(guessCategory("Loja Qualquer Coisa 123")).toBe("cartao");
+  it("nome de pessoa/desconhecido cai em cartão", () => {
     expect(guessCategory("Amanda de Fatima Silva")).toBe("cartao");
+    expect(guessCategory("Pagamento diverso XYZ")).toBe("cartao");
+  });
+
+  it("restaurantes e delivery", () => {
+    expect(guessCategory("iFood *Restaurante")).toBe("restaurante");
+    expect(guessCategory("Pit Stop do Espeto Gle")).toBe("restaurante");
+    expect(guessCategory("Espetinho do Zé")).toBe("restaurante");
+    expect(guessCategory("Rappi Brasil")).toBe("restaurante");
+  });
+
+  it("saúde e farmácia (antes de mercado)", () => {
+    expect(guessCategory("Farmácia Pague Menos")).toBe("saude");
+    expect(guessCategory("Drogaria São Paulo")).toBe("saude");
+    expect(guessCategory("Clínica Odonto Sorriso")).toBe("saude");
+  });
+
+  it("transporte não vira combustível", () => {
+    expect(guessCategory("Uber *Trip")).toBe("transporte");
+    expect(guessCategory("99app *viagem")).toBe("transporte");
+    expect(guessCategory("Estacionamento Central")).toBe("transporte");
+  });
+
+  it("compras e e-commerce; 'mercado livre' não vira mercado", () => {
+    expect(guessCategory("Mercado Livre")).toBe("compras");
+    expect(guessCategory("Amazon.com.br")).toBe("compras");
+    expect(guessCategory("Loja Qualquer Coisa 123")).toBe("compras");
+    expect(guessCategory("Renner")).toBe("compras");
+  });
+
+  it("casa e contas", () => {
+    expect(guessCategory("CEMIG Distribuicao")).toBe("casa");
+    expect(guessCategory("Aluguel apartamento")).toBe("casa");
+    expect(guessCategory("Condominio Edificio")).toBe("casa");
+  });
+
+  it("lazer, educação e pet", () => {
+    expect(guessCategory("Cinemark Shopping")).toBe("lazer");
+    expect(guessCategory("Faculdade Mensalidade")).toBe("educacao");
+    expect(guessCategory("Petz Racao")).toBe("pet");
   });
 });

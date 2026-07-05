@@ -37,6 +37,13 @@ export type IconName =
   | "fuel"
   | "dumbbell"
   | "wifi"
+  | "utensils"
+  | "heart"
+  | "bus"
+  | "bag"
+  | "ticket"
+  | "book"
+  | "paw"
   | "dots"
   | "wallet";
 
@@ -191,6 +198,51 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <circle cx="12" cy="18" r="0.8" fill="currentColor" stroke="none" />
     </>
   ),
+  utensils: (
+    <>
+      <path d="M7.5 3v5a2 2 0 0 0 4 0V3" />
+      <path d="M9.5 10v11" />
+      <path d="M16.5 3c-1.7 0-2.6 3-2.6 5.8 0 1.5 1 2.4 2.6 2.4V21" />
+    </>
+  ),
+  heart: (
+    <path d="M12 20 4.6 12.3a4.7 4.7 0 0 1 7.4-6.4 4.7 4.7 0 0 1 7.4 6.4L12 20Z" />
+  ),
+  bus: (
+    <>
+      <rect x="5" y="4" width="14" height="13" rx="2" />
+      <path d="M5 12h14M9 4v8M15 4v8M7 17v2M17 17v2" />
+      <circle cx="8.5" cy="14.5" r="0.8" fill="currentColor" stroke="none" />
+      <circle cx="15.5" cy="14.5" r="0.8" fill="currentColor" stroke="none" />
+    </>
+  ),
+  bag: (
+    <>
+      <path d="M6.5 8h11l-1 11.2a1 1 0 0 1-1 .9H8.5a1 1 0 0 1-1-.9L6.5 8Z" />
+      <path d="M9.2 8V6.5a2.8 2.8 0 0 1 5.6 0V8" />
+    </>
+  ),
+  ticket: (
+    <>
+      <path d="M4 9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a2 2 0 0 0 0 4v1a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1a2 2 0 0 0 0-4V9Z" />
+      <path d="M13 7.5v9" />
+    </>
+  ),
+  book: (
+    <>
+      <path d="M12 6.5C10.5 5 8 4.5 4 5v12c4-.5 6.5 0 8 1.5 1.5-1.5 4-2 8-1.5V5c-4-.5-6.5 0-8 1.5Z" />
+      <path d="M12 6.5V18" />
+    </>
+  ),
+  paw: (
+    <>
+      <circle cx="7.5" cy="9.5" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="11" cy="7.8" r="1.6" fill="currentColor" stroke="none" />
+      <circle cx="14.8" cy="8.2" r="1.6" fill="currentColor" stroke="none" />
+      <circle cx="17.6" cy="11.2" r="1.4" fill="currentColor" stroke="none" />
+      <path d="M12.4 11.8c-2.4 0-4.3 1.7-4.3 3.8 0 1.6 1.3 2.4 2.7 2.4.9 0 1.1-.3 1.6-.3s.7.3 1.6.3c1.4 0 2.7-.8 2.7-2.4 0-2.1-1.9-3.8-4.3-3.8Z" fill="currentColor" stroke="none" />
+    </>
+  ),
   dots: (
     <>
       <circle cx="6" cy="12" r="1.3" fill="currentColor" stroke="none" />
@@ -248,6 +300,14 @@ export const CATEGORY_ICON: Record<CategoryKey, IconName> = {
   combustivel: "fuel",
   academia: "dumbbell",
   internet: "wifi",
+  restaurante: "utensils",
+  saude: "heart",
+  transporte: "bus",
+  compras: "bag",
+  casa: "home",
+  lazer: "ticket",
+  educacao: "book",
+  pet: "paw",
   outros: "dots",
   receita: "wallet",
 };

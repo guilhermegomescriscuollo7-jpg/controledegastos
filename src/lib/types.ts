@@ -7,6 +7,14 @@ export type CategoryKey =
   | "combustivel"
   | "academia"
   | "internet"
+  | "restaurante"
+  | "saude"
+  | "transporte"
+  | "compras"
+  | "casa"
+  | "lazer"
+  | "educacao"
+  | "pet"
   | "outros"
   | "receita";
 

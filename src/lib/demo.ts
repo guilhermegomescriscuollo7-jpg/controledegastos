@@ -21,10 +21,10 @@ export const DEMO_TRANSACTIONS: Transaction[] = [
   { id: "d9", date: iso(15), description: "Shell Combustíveis", amount: -230, category: "combustivel", source: "csv", account: "Sicoob" },
   { id: "d10", date: iso(1), description: "Smart Fit", amount: -119.9, category: "academia", source: "csv", account: "Nubank" },
   { id: "d11", date: iso(1), description: "Vivo Fibra Internet", amount: -99.9, category: "internet", source: "csv", account: "Sicoob" },
-  { id: "d12", date: iso(12), description: "iFood", amount: -73.4, category: "cartao", source: "csv", account: "Nubank" },
-  { id: "d13", date: iso(14), description: "Amazon.com.br", amount: -158.9, category: "cartao", source: "csv", account: "Nubank" },
-  { id: "d14", date: iso(20), description: "Farmácia Pague Menos", amount: -64.2, category: "cartao", source: "csv", account: "Nubank" },
-  { id: "d15", date: iso(21), description: "Uber", amount: -42.7, category: "cartao", source: "csv", account: "Nubank" },
+  { id: "d12", date: iso(12), description: "iFood", amount: -73.4, category: "restaurante", source: "csv", account: "Nubank" },
+  { id: "d13", date: iso(14), description: "Amazon.com.br", amount: -158.9, category: "compras", source: "csv", account: "Nubank" },
+  { id: "d14", date: iso(20), description: "Farmácia Pague Menos", amount: -64.2, category: "saude", source: "csv", account: "Nubank" },
+  { id: "d15", date: iso(21), description: "Uber", amount: -42.7, category: "transporte", source: "csv", account: "Nubank" },
 ];
 
 export const DEMO_BUDGETS: Budget[] = [

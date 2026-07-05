@@ -68,7 +68,15 @@ export async function POST(req: Request) {
         "- seguro_carro: seguradoras de automóvel.\n" +
         "- academia: academias e apps de treino.\n" +
         "- internet: provedores de internet/telefonia (Vivo, Claro, TIM, Oi).\n" +
-        "- cartao: compras genéricas no cartão (lojas, farmácia, apps de transporte, delivery, restaurantes) quando não houver categoria melhor.\n" +
+        "- restaurante: restaurantes, lanchonetes, bares, delivery (iFood, Rappi), padarias-café.\n" +
+        "- saude: farmácia, drogaria, hospital, clínica, laboratório, dentista, plano de saúde.\n" +
+        "- transporte: apps e transporte público (Uber, 99, táxi, metrô, ônibus, estacionamento, pedágio) — NÃO é combustível.\n" +
+        "- compras: e-commerce e lojas (Amazon, Mercado Livre, Shopee, roupas, magazines).\n" +
+        "- casa: aluguel, condomínio e contas de casa (luz, água, gás, IPTU).\n" +
+        "- lazer: cinema, shows, viagens, hotéis, jogos.\n" +
+        "- educacao: escola, faculdade, cursos, livraria.\n" +
+        "- pet: petshop, veterinário, ração.\n" +
+        "- cartao: compras genéricas no cartão quando não houver categoria melhor.\n" +
         "- outros: só quando realmente não der para inferir nada.\n" +
         "Responda APENAS com um array JSON de strings, sem markdown, com exatamente " +
         "uma chave de categoria para cada descrição recebida, na mesma ordem.",
