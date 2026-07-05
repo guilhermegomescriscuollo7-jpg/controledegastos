@@ -17,21 +17,25 @@ import { upcomingBills } from "@/lib/recurring";
 import { UpcomingBills } from "@/components/UpcomingBills";
 import { InstallmentTracker } from "@/components/InstallmentTracker";
 import { SubscriptionsPanel } from "@/components/SubscriptionsPanel";
-import { MonthlyCompare } from "@/components/MonthlyCompare";
-import { WeekdayChart } from "@/components/WeekdayChart";
 import { TopExpenses } from "@/components/TopExpenses";
 import { AccountSplit } from "@/components/AccountSplit";
 import { ForecastCard } from "@/components/ForecastCard";
 import { SmartInsights } from "@/components/SmartInsights";
 import { HealthGauge } from "@/components/HealthGauge";
 import { StatCard } from "@/components/StatCard";
-import { SpendingChart } from "@/components/SpendingChart";
-import { CategoryDonut } from "@/components/CategoryDonut";
 import { BudgetList } from "@/components/BudgetList";
 import { AIAdvisor } from "@/components/AIAdvisor";
 import { TransactionList } from "@/components/TransactionList";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { MonthPicker } from "@/components/MonthPicker";
+import { SetupChecklist } from "@/components/SetupChecklist";
+import { DashboardTabs, type DashTab } from "@/components/DashboardTabs";
+import {
+  SpendingChart,
+  CategoryDonut,
+  MonthlyCompare,
+  WeekdayChart,
+} from "@/components/LazyCharts";
 import { Icon } from "@/components/icons";
 import Link from "next/link";
 
@@ -87,6 +91,110 @@ export default async function DashboardPage({
       ? "Boa tarde"
       : "Boa noite";
 
+  const hasBills = bills.length > 0 || installments.length > 0 || subscriptions.length > 0;
+
+  const tabs: DashTab[] = [
+    {
+      id: "resumo",
+      label: "Resumo",
+      icon: "home",
+      content: (
+        <>
+          <AIAdvisor summary={summary} savingsTarget={savingsTarget} />
+          <section className="grid gap-5 lg:grid-cols-2">
+            <SmartInsights
+              deltas={deltas}
+              balance={summary.balance}
+              savingsTarget={savingsTarget}
+              forecast={forecast}
+              topExpense={
+                topExpense
+                  ? {
+                      description: topExpense.description,
+                      amount: topExpense.amount,
+                      category: topExpense.category,
+                    }
+                  : undefined
+              }
+            />
+            <HealthGauge health={health} />
+          </section>
+          <section className="grid gap-5 lg:grid-cols-2">
+            <SpendingChart data={series} />
+            <CategoryDonut data={summary.byCategory} />
+          </section>
+          <section>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Últimas transações</h2>
+              <Link
+                href="/transactions"
+                className="link-dim flex items-center gap-1 text-sm"
+              >
+                Ver todas <Icon name="arrow-right" size={15} />
+              </Link>
+            </div>
+            <TransactionList transactions={transactions} limit={6} />
+          </section>
+        </>
+      ),
+    },
+    {
+      id: "analises",
+      label: "Análises",
+      icon: "scale",
+      content: (
+        <>
+          <MonthlyCompare data={compare} selectedMonth={monthKey} />
+          <section className="grid gap-5 lg:grid-cols-2">
+            <ForecastCard forecast={forecast} income={summary.income} />
+            <AccountSplit data={accounts} />
+          </section>
+          <section className="grid gap-5 lg:grid-cols-2">
+            <WeekdayChart data={weekdays} />
+            <TopExpenses transactions={biggest} />
+          </section>
+          <BudgetList status={summary.budgetStatus} />
+        </>
+      ),
+    },
+    {
+      id: "contas",
+      label: "Contas",
+      icon: "calendar",
+      content: hasBills ? (
+        <>
+          {(bills.length > 0 || installments.length > 0) && (
+            <section className="grid gap-5 lg:grid-cols-2">
+              <UpcomingBills bills={bills} />
+              <InstallmentTracker plans={installments} />
+            </section>
+          )}
+          {subscriptions.length > 0 && <SubscriptionsPanel subs={subscriptions} />}
+        </>
+      ) : (
+        <div className="glass p-8 text-center">
+          <div className="text-dim mx-auto mb-3 grid h-11 w-11 place-items-center rounded-full fill-1">
+            <Icon name="calendar" size={20} />
+          </div>
+          <h3 className="font-semibold">Nada por aqui ainda</h3>
+          <p className="text-dim mx-auto mt-1 max-w-sm text-sm">
+            Cadastre contas fixas em <strong>Ajustes</strong> para ver os
+            vencimentos, ou importe extratos para detectar parcelados e
+            assinaturas automaticamente.
+          </p>
+          <div className="mt-4 flex justify-center gap-2">
+            <Link href="/settings" className="btn-glass">
+              Recorrentes
+            </Link>
+            <Link href="/import" className="btn-primary">
+              Importar
+            </Link>
+          </div>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <main className="space-y-5">
       <header className="flex items-start justify-between gap-3">
@@ -128,7 +236,16 @@ export default async function DashboardPage({
         </div>
       )}
 
-      {/* Cards de resumo */}
+      {/* Onboarding (some quando tudo está configurado) */}
+      {!demo && (
+        <SetupChecklist
+          hasSalary={monthlySalary > 0}
+          hasBudgets={budgets.length > 0}
+          hasTransactions={transactions.length > 0}
+        />
+      )}
+
+      {/* Cards de resumo (sempre visíveis) */}
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard label="Receitas" value={summary.income} accent="#34c759" icon="arrow-up" />
         <StatCard label="Gastos" value={summary.expenses} accent="#ff375f" icon="arrow-down" />
@@ -147,74 +264,7 @@ export default async function DashboardPage({
         />
       </section>
 
-      {/* IA */}
-      <AIAdvisor summary={summary} savingsTarget={savingsTarget} />
-
-      {/* Análise inteligente + saúde financeira */}
-      <section className="grid gap-5 lg:grid-cols-2">
-        <SmartInsights
-          deltas={deltas}
-          balance={summary.balance}
-          savingsTarget={savingsTarget}
-          forecast={forecast}
-          topExpense={
-            topExpense
-              ? {
-                  description: topExpense.description,
-                  amount: topExpense.amount,
-                  category: topExpense.category,
-                }
-              : undefined
-          }
-        />
-        <HealthGauge health={health} />
-      </section>
-
-      {/* Contas a pagar + parcelados */}
-      {(bills.length > 0 || installments.length > 0) && (
-        <section className="grid gap-5 lg:grid-cols-2">
-          <UpcomingBills bills={bills} />
-          <InstallmentTracker plans={installments} />
-        </section>
-      )}
-
-      {/* Assinaturas detectadas */}
-      {subscriptions.length > 0 && <SubscriptionsPanel subs={subscriptions} />}
-
-      {/* Graficos */}
-      <section className="grid gap-5 lg:grid-cols-2">
-        <SpendingChart data={series} />
-        <CategoryDonut data={summary.byCategory} />
-      </section>
-
-      <MonthlyCompare data={compare} selectedMonth={monthKey} />
-
-      {/* Analises do mes */}
-      <section className="grid gap-5 lg:grid-cols-2">
-        <ForecastCard forecast={forecast} income={summary.income} />
-        <AccountSplit data={accounts} />
-      </section>
-
-      <section className="grid gap-5 lg:grid-cols-2">
-        <WeekdayChart data={weekdays} />
-        <TopExpenses transactions={biggest} />
-      </section>
-
-      <BudgetList status={summary.budgetStatus} />
-
-      {/* Ultimas transacoes */}
-      <section>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Últimas transações</h2>
-          <Link
-            href="/transactions"
-            className="link-dim flex items-center gap-1 text-sm"
-          >
-            Ver todas <Icon name="arrow-right" size={15} />
-          </Link>
-        </div>
-        <TransactionList transactions={transactions} limit={6} />
-      </section>
+      <DashboardTabs tabs={tabs} />
     </main>
   );
 }
