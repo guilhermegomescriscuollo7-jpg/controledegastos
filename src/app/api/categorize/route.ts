@@ -58,10 +58,20 @@ export async function POST(req: Request) {
       max_tokens: 2000,
       system:
         "Você categoriza gastos de extratos bancários brasileiros. " +
-        `As categorias possíveis são: ${keys}. ` +
+        `As categorias possíveis (use a CHAVE, não o rótulo) são: ${keys}. ` +
+        "Regras importantes:\n" +
+        "- combustivel: SOMENTE postos de gasolina reais (Posto, Ipiranga, Shell, BR, Texaco). " +
+        "NÃO use para restaurantes, espetinhos, lanchonetes ou bares, mesmo que o nome tenha 'pit stop', 'parada' ou 'posto do espeto'.\n" +
+        "- mercado: supermercados, açougue, padaria, hortifruti, mercearia (compras de casa).\n" +
+        "- assinaturas: serviços digitais recorrentes (Netflix, Spotify, Amazon Prime, YouTube, iCloud, ChatGPT...).\n" +
+        "- financiamento_carro: SOMENTE parcelas claramente do carro/veículo. Financiamento de outra coisa NÃO conta.\n" +
+        "- seguro_carro: seguradoras de automóvel.\n" +
+        "- academia: academias e apps de treino.\n" +
+        "- internet: provedores de internet/telefonia (Vivo, Claro, TIM, Oi).\n" +
+        "- cartao: compras genéricas no cartão (lojas, farmácia, apps de transporte, delivery, restaurantes) quando não houver categoria melhor.\n" +
+        "- outros: só quando realmente não der para inferir nada.\n" +
         "Responda APENAS com um array JSON de strings, sem markdown, com exatamente " +
-        "uma chave de categoria para cada descrição recebida, na mesma ordem. " +
-        "Use 'cartao' para compras genéricas no cartão e 'outros' quando não souber.",
+        "uma chave de categoria para cada descrição recebida, na mesma ordem.",
       messages: [
         {
           role: "user",
