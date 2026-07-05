@@ -60,15 +60,19 @@ export interface PdfDraft {
   amount: number;
 }
 
-// Linhas de saldo — nunca viram transação (mesmo coladas na data).
-const SALDO_LINE = /saldo|s\s*a\s*l\s*d\s*o/i;
+// Linhas de saldo/resumo — nunca viram transação (mesmo coladas na data).
+const SALDO_LINE =
+  /saldo|s\s*a\s*l\s*d\s*o|pagamento\s*m[íi]nimo|total\s*a\s*pagar|limite\s*(de\s*)?cr[ée]dito|cr[ée]dito\s*rotativo|fatura\s*anterior/i;
 
 // Rodapé / resumo do extrato — encerram o bloco de transação atual.
 const FOOTER_LINE =
-  /^(resumo|encargos|outras informa|vencimento cheque|taxa cheque|custo efetivo|\(\+\)|\(-\)|\(=\)|\d{3} extratos|em caso de|sac:|ouvidoria|estamos prontos|plataforma de|sistema de coop|coop\.?:|conta:|per[íi]odo:|hist[óo]rico de|data\s*hist)/i;
+  /^(resumo|encargos|outras informa|vencimento cheque|taxa cheque|custo efetivo|\(\+\)|\(-\)|\(=\)|\d{3} extratos|em caso de|sac:|ouvidoria|estamos prontos|plataforma de|sistema de coop|coop\.?:|conta:|per[íi]odo:|hist[óo]rico de|data\s*hist|subtotal|total\b|juros|\biof\b|multa)/i;
 
-// Data no início da linha (a descrição pode vir colada, ex.: "01/06PIX...").
-const LEADING_DATE = /^\s*\d{2}\/\d{2}(?:\/\d{2,4})?/;
+// Início de linha com data: dd/mm[/aa], dd.mm.aaaa (só o formato completo,
+// para não confundir com CNPJ tipo "05.245.166") ou "05 JUN" (fatura Nubank).
+// A descrição pode vir colada, ex.: "01/06PIX...".
+const LEADING_DATE =
+  /^\s*(?:\d{1,2}\/\d{2}(?:\/\d{2,4})?|\d{1,2}\.\d{2}\.\d{4}|\d{1,2}\s*(?:de\s*)?[\/ ]?(?:jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez))/i;
 
 /** Descobre o ano do extrato (para datas dd/mm sem ano). */
 function detectYear(lines: string[]): number {

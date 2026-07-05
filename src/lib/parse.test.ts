@@ -64,6 +64,20 @@ describe("parseDate", () => {
   it("prioriza data completa mesmo com fallback", () => {
     expect(parseDate("05/06/2025 PIX", 2026)).toBe("2025-06-05");
   });
+
+  it("entende data com nome de mês (fatura Nubank)", () => {
+    expect(parseDate("05 JUN", 2026)).toBe("2026-06-05");
+    expect(parseDate("12 dez 2025", 2026)).toBe("2025-12-12");
+    expect(parseDate("5 de janeiro", 2026)).toBe("2026-01-05");
+  });
+
+  it("entende dd.mm.aaaa com pontos", () => {
+    expect(parseDate("31.12.2024")).toBe("2024-12-31");
+  });
+
+  it("não confunde CNPJ (05.245.166) com data", () => {
+    expect(parseDate("05.245.166 0001-91")).toBeNull();
+  });
 });
 
 describe("findStatementAmount (extrato com D/C)", () => {

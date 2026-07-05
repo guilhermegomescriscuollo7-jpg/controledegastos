@@ -16,20 +16,44 @@ export function parseAmount(raw: string): number | null {
   return neg ? -n : n;
 }
 
+const MESES: Record<string, number> = {
+  jan: 1, fev: 2, mar: 3, abr: 4, mai: 5, jun: 6,
+  jul: 7, ago: 8, set: 9, out: 10, nov: 11, dez: 12,
+};
+
+const pad2 = (n: number) => String(n).padStart(2, "0");
+
+// "05 JUN", "5 de junho", "05/JUN/2026", "05 jun 2026"
+const MONTH_NAME_RE =
+  /\b(\d{1,2})\s*(?:de\s*)?[\/ ]?(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\w*\.?(?:[\/ ]?(\d{4}))?/i;
+
 /**
- * Converte dd/mm/yyyy, yyyy-mm-dd, dd/mm/yy em ISO yyyy-mm-dd.
- * Com `fallbackYear`, também entende dd/mm sem ano (comum no extrato Sicoob),
- * usando o ano informado.
+ * Converte várias formas de data em ISO yyyy-mm-dd:
+ * dd/mm/yyyy, dd.mm.yyyy, yyyy-mm-dd, dd/mm/yy, "05 JUN [2026]".
+ * Com `fallbackYear`, também entende dd/mm e "05 JUN" sem ano (extrato
+ * Sicoob e fatura Nubank).
  */
 export function parseDate(raw: string, fallbackYear?: number): string | null {
   if (!raw) return null;
   const s = raw.trim();
-  let m = s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  let m = s.match(/(\d{2})[/.](\d{2})[/.](\d{4})/);
   if (m) return `${m[3]}-${m[2]}-${m[1]}`;
   m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
   if (m) return `${m[1]}-${m[2]}-${m[3]}`;
   m = s.match(/(\d{2})\/(\d{2})\/(\d{2})(?!\d)/);
   if (m) return `20${m[3]}-${m[2]}-${m[1]}`;
+
+  // Data com nome do mês (fatura Nubank e afins)
+  m = s.match(MONTH_NAME_RE);
+  if (m) {
+    const dd = Number(m[1]);
+    const mo = MESES[m[2].toLowerCase()];
+    const yr = m[3] ? Number(m[3]) : fallbackYear;
+    if (yr && mo && dd >= 1 && dd <= 31) {
+      return `${yr}-${pad2(mo)}-${pad2(dd)}`;
+    }
+  }
+
   if (fallbackYear) {
     // dd/mm isolado (sem barra/ dígito antes ou depois)
     m = s.match(/(?:^|\s)(\d{2})\/(\d{2})(?![\/\d])/);
