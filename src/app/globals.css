@@ -31,6 +31,14 @@
   --tooltip-bg: rgba(28, 28, 30, 0.96);
   --scrollbar: rgba(255, 255, 255, 0.18);
   --tint: rgba(10, 132, 255, 0.06);
+
+  /* Aurora do fundo */
+  --aurora-1: rgba(124, 92, 255, 0.35);
+  --aurora-2: rgba(10, 132, 255, 0.28);
+  --aurora-3: rgba(56, 189, 248, 0.18);
+  --aurora-opacity: 0.55;
+  /* Brilho superior dos cards de vidro */
+  --card-sheen: rgba(255, 255, 255, 0.06);
 }
 
 /* ===== TEMA CLARO — apple.com ===== */
@@ -61,6 +69,13 @@
   --tooltip-bg: rgba(255, 255, 255, 0.98);
   --scrollbar: rgba(0, 0, 0, 0.2);
   --tint: rgba(0, 113, 227, 0.05);
+
+  /* Aurora do fundo (bem suave no claro) */
+  --aurora-1: rgba(124, 92, 255, 0.16);
+  --aurora-2: rgba(10, 132, 255, 0.14);
+  --aurora-3: rgba(56, 189, 248, 0.1);
+  --aurora-opacity: 0.7;
+  --card-sheen: rgba(255, 255, 255, 0.5);
 }
 
 * {
@@ -91,30 +106,79 @@ body {
   }
 }
 
-/* ===== Fundo limpo (apple.com) — leve véu, sem blobs ===== */
+/* ===== Fundo ambiente com aurora ===== */
 .app-bg {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: radial-gradient(
-      120% 80% at 50% -10%,
-      var(--tint) 0%,
-      transparent 55%
-    ),
-    var(--bg-base);
+  overflow: hidden;
+  background: var(--bg-base);
+}
+.app-bg::before,
+.app-bg::after,
+.app-bg .blob-3 {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: var(--aurora-opacity);
+  will-change: transform;
+}
+.app-bg::before {
+  width: 62vw;
+  height: 62vw;
+  top: -22vw;
+  left: -12vw;
+  background: radial-gradient(circle, var(--aurora-1), transparent 68%);
+  animation: aurora-a 24s ease-in-out infinite;
+}
+.app-bg::after {
+  width: 55vw;
+  height: 55vw;
+  top: 28vh;
+  right: -16vw;
+  background: radial-gradient(circle, var(--aurora-2), transparent 68%);
+  animation: aurora-b 30s ease-in-out infinite;
 }
 .app-bg .blob-3 {
-  display: none;
+  display: block;
+  width: 46vw;
+  height: 46vw;
+  bottom: -18vw;
+  left: 24vw;
+  background: radial-gradient(circle, var(--aurora-3), transparent 70%);
+  animation: aurora-c 34s ease-in-out infinite;
+}
+@keyframes aurora-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(6vw, 5vh) scale(1.12); }
+}
+@keyframes aurora-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-5vw, -4vh) scale(1.1); }
+}
+@keyframes aurora-c {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(4vw, -6vh) scale(1.15); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-bg::before,
+  .app-bg::after,
+  .app-bg .blob-3 {
+    animation: none !important;
+  }
 }
 
 @layer components {
   /* Card limpo e sóbrio */
   .glass {
+    position: relative;
     background: var(--card-bg);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid var(--card-border);
-    box-shadow: var(--card-shadow);
+    /* brilho superior interno + sombra profunda */
+    box-shadow: inset 0 1px 0 var(--card-sheen), var(--card-shadow);
     border-radius: 1.25rem;
   }
   .glass-strong {
@@ -131,14 +195,22 @@ body {
   .btn-glass:hover {
     background: var(--surface-2);
   }
+  .btn-glass:active {
+    transform: scale(0.96);
+  }
 
   .btn-primary {
     @apply rounded-full px-5 py-2.5 text-sm font-medium text-white transition;
     background: var(--accent);
     cursor: pointer;
+    box-shadow: 0 4px 16px -4px color-mix(in srgb, var(--accent) 60%, transparent);
   }
   .btn-primary:hover {
     background: var(--accent-press);
+    box-shadow: 0 6px 20px -4px color-mix(in srgb, var(--accent) 70%, transparent);
+  }
+  .btn-primary:active {
+    transform: scale(0.96);
   }
 
   .input-glass {

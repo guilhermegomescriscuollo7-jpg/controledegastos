@@ -26,6 +26,12 @@ export function WeekdayChart({ data }: Props) {
       </p>
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={data} margin={{ left: -18, right: 8, top: 4 }}>
+          <defs>
+            <linearGradient id="wkGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#5e5ce6" stopOpacity={0.95} />
+              <stop offset="100%" stopColor="#5e5ce6" stopOpacity={0.4} />
+            </linearGradient>
+          </defs>
           <CartesianGrid vertical={false} />
           <XAxis dataKey="label" tickLine={false} axisLine={false} />
           <YAxis
@@ -47,7 +53,7 @@ export function WeekdayChart({ data }: Props) {
             itemStyle={{ color: "var(--text)" }}
             formatter={(v: number) => [BRL.format(v), "Gastos"]}
           />
-          <Bar dataKey="total" radius={[8, 8, 0, 0]} fill="#5e5ce6" />
+          <Bar dataKey="total" radius={[8, 8, 0, 0]} fill="url(#wkGrad)" />
         </BarChart>
       </ResponsiveContainer>
     </div>

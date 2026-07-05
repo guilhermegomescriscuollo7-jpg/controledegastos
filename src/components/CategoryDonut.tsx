@@ -32,10 +32,15 @@ export function CategoryDonut({ data }: Props) {
                 innerRadius={62}
                 outerRadius={90}
                 paddingAngle={3}
+                cornerRadius={5}
                 stroke="none"
               >
                 {chartData.map((d, i) => (
-                  <Cell key={i} fill={d.color} />
+                  <Cell
+                    key={i}
+                    fill={d.color}
+                    style={{ filter: `drop-shadow(0 0 5px ${d.color}55)` }}
+                  />
                 ))}
               </Pie>
               <Tooltip
@@ -51,8 +56,11 @@ export function CategoryDonut({ data }: Props) {
             </PieChart>
           </ResponsiveContainer>
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-dim text-[10px] uppercase">Total</span>
-            <span className="text-lg font-bold">{BRL.format(total)}</span>
+            <span className="text-dim text-[10px] uppercase tracking-wide">Total</span>
+            <span className="text-xl font-bold tracking-[-0.02em]">{BRL.format(total)}</span>
+            <span className="text-dim mt-0.5 text-[10px]">
+              {chartData.length} categoria{chartData.length !== 1 ? "s" : ""}
+            </span>
           </div>
         </div>
         <ul className="flex-1 space-y-1.5 self-stretch">

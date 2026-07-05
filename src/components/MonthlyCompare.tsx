@@ -30,6 +30,16 @@ export function MonthlyCompare({ data, selectedMonth }: Props) {
       </p>
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={data} margin={{ left: -18, right: 8, top: 4 }}>
+          <defs>
+            <linearGradient id="mcOn" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--accent)" stopOpacity={1} />
+              <stop offset="100%" stopColor="var(--accent)" stopOpacity={0.55} />
+            </linearGradient>
+            <linearGradient id="mcOff" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#0a84ff" stopOpacity={0.45} />
+              <stop offset="100%" stopColor="#0a84ff" stopOpacity={0.15} />
+            </linearGradient>
+          </defs>
           <CartesianGrid vertical={false} />
           <XAxis dataKey="label" tickLine={false} axisLine={false} />
           <YAxis
@@ -55,7 +65,7 @@ export function MonthlyCompare({ data, selectedMonth }: Props) {
             {data.map((d) => (
               <Cell
                 key={d.month}
-                fill={d.month === selectedMonth ? "var(--accent)" : "#0a84ff55"}
+                fill={d.month === selectedMonth ? "url(#mcOn)" : "url(#mcOff)"}
               />
             ))}
           </Bar>
