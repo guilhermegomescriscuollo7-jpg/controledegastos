@@ -50,8 +50,9 @@ export function parseDate(raw: string, fallbackYear?: number): string | null {
  * ou sem separador de milhar. Usa o último valor da linha (o do lançamento).
  */
 export function findStatementAmount(line: string): number | null {
+  // (?!\s*%) evita ler percentuais (ex.: "TAXA ... 7,99%") como dinheiro.
   const re =
-    /-?\(?\s*R?\$?\s*(?:\d{1,3}(?:\.\d{3})+|\d+),\d{2}\)?\s*[DC]?-?/gi;
+    /-?\(?\s*R?\$?\s*(?:\d{1,3}(?:\.\d{3})+|\d+),\d{2}(?!\s*%)\)?\s*[DC]?-?/gi;
   const matches = line.match(re);
   if (!matches) return null;
   for (let i = matches.length - 1; i >= 0; i--) {

@@ -82,6 +82,10 @@ describe("findStatementAmount (extrato com D/C)", () => {
   it("retorna null sem valor monetário", () => {
     expect(findStatementAmount("SALDO ANTERIOR")).toBeNull();
   });
+
+  it("ignora percentual (taxa, não é dinheiro)", () => {
+    expect(findStatementAmount("TAXA CHEQUE ESPECIAL (a.m.): 7,99%")).toBeNull();
+  });
 });
 
 describe("findAmountInLine", () => {

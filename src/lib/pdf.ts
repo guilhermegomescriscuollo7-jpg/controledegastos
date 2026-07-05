@@ -60,9 +60,15 @@ export interface PdfDraft {
   amount: number;
 }
 
-// Linhas que são saldo/total/cabeçalho — não viram transação.
-const SKIP_LINE =
-  /\bsaldo\b|s\s*a\s*l\s*d\s*o|\btotal\b|limite\s*dispon|saldo\s*anterior|saldo\s*do\s*dia|resumo|lan[çc]amentos\s*futuros/i;
+// Linhas de saldo — nunca viram transação (mesmo coladas na data).
+const SALDO_LINE = /saldo|s\s*a\s*l\s*d\s*o/i;
+
+// Rodapé / resumo do extrato — encerram o bloco de transação atual.
+const FOOTER_LINE =
+  /^(resumo|encargos|outras informa|vencimento cheque|taxa cheque|custo efetivo|\(\+\)|\(-\)|\(=\)|\d{3} extratos|em caso de|sac:|ouvidoria|estamos prontos|plataforma de|sistema de coop|coop\.?:|conta:|per[íi]odo:|hist[óo]rico de|data\s*hist)/i;
+
+// Data no início da linha (a descrição pode vir colada, ex.: "01/06PIX...").
+const LEADING_DATE = /^\s*\d{2}\/\d{2}(?:\/\d{2,4})?/;
 
 /** Descobre o ano do extrato (para datas dd/mm sem ano). */
 function detectYear(lines: string[]): number {
@@ -73,15 +79,44 @@ function detectYear(lines: string[]): number {
   return new Date().getFullYear();
 }
 
+/** Tira a data inicial e os valores (com D/C) de uma linha. */
+function stripDateAndAmount(line: string): string {
+  return line
+    .replace(LEADING_DATE, "")
+    .replace(
+      /-?\(?\s*R?\$?\s*(?:\d{1,3}(?:\.\d{3})+|\d+),\d{2}\)?\s*[DC*]?-?/gi,
+      ""
+    )
+    .replace(/\s{2,}/g, " ")
+    .replace(/^[\s·|—-]+|[\s·|—-]+$/g, "")
+    .trim();
+}
+
+/** Junta o cabeçalho + detalhes numa descrição única e enxuta. */
+function buildDescription(parts: string[]): string {
+  const seen = new Set<string>();
+  const clean = parts
+    .map((p) => p.replace(/\s{2,}/g, " ").trim())
+    .filter((p) => p.length > 0 && !seen.has(p) && seen.add(p));
+  let desc = clean.join(" · ");
+  if (desc.length > 110) desc = desc.slice(0, 109).trimEnd() + "…";
+  return desc;
+}
+
+interface Block {
+  date: string;
+  parts: string[];
+  amount: number;
+}
+
 /**
- * Lê um extrato/fatura em PDF e devolve possíveis transações.
+ * Lê um extrato/fatura em PDF e devolve as transações.
  *
- * Robusto para dois layouts comuns:
- *  - data + valor na mesma linha (faturas Nubank e afins);
- *  - data num cabeçalho do dia e os lançamentos abaixo só com
- *    descrição + valor (extrato Sicoob) — a data é "carregada" para
- *    as linhas seguintes até aparecer outra.
- * Considera o sufixo D/C (débito/crédito) do Sicoob.
+ * Leitura por blocos: uma transação começa na linha com data + valor e
+ * incorpora as linhas de detalhe seguintes (favorecido, tipo do Pix,
+ * CNPJ, documento...) até aparecer a próxima data. Isso captura a
+ * descrição completa do extrato Sicoob e ignora saldos, percentuais
+ * (ex.: taxa 7,99%) e o resumo do rodapé.
  */
 export async function parsePdfTransactions(file: File): Promise<{
   drafts: PdfDraft[];
@@ -89,34 +124,47 @@ export async function parsePdfTransactions(file: File): Promise<{
   sample: string[];
 }> {
   const lines = await extractLines(file);
-  const drafts: PdfDraft[] = [];
   const year = detectYear(lines);
-  let currentDate: string | null = null;
+  const blocks: Block[] = [];
+  let cur: Block | null = null;
 
-  for (const line of lines) {
-    const lineDate = parseDate(line, year);
-    if (lineDate) currentDate = lineDate;
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) continue;
 
-    if (SKIP_LINE.test(line)) continue;
+    if (LEADING_DATE.test(line)) {
+      // Linha com data: inicia (ou não) uma transação.
+      const date = parseDate(line, year);
+      if (!date || SALDO_LINE.test(line)) {
+        cur = null;
+        continue;
+      }
+      const amount = findStatementAmount(line);
+      if (amount === null || amount === 0) {
+        cur = null;
+        continue;
+      }
+      const head = stripDateAndAmount(line);
+      cur = { date, parts: head ? [head] : [], amount };
+      blocks.push(cur);
+      continue;
+    }
 
-    const amount = findStatementAmount(line);
-    if (amount === null || amount === 0) continue;
-
-    const date = lineDate ?? currentDate;
-    if (!date) continue;
-
-    // Descrição = linha sem a data e sem os valores monetários (com D/C).
-    const description = line
-      .replace(/\d{2}\/\d{2}\/\d{2,4}/g, "")
-      .replace(/(?:^|\s)\d{2}\/\d{2}(?![\/\d])/g, " ")
-      .replace(/-?\(?\s*R?\$?\s*(?:\d{1,3}(?:\.\d{3})+|\d+),\d{2}\)?\s*[DC]?-?/gi, "")
-      .replace(/\s{2,}/g, " ")
-      .replace(/^[\s·|—-]+|[\s·|—-]+$/g, "")
-      .trim();
-
-    if (!description || description.length < 2) continue;
-    drafts.push({ date, description, amount });
+    // Linha sem data: detalhe do lançamento atual (ou rodapé → encerra).
+    if (FOOTER_LINE.test(line) || SALDO_LINE.test(line)) {
+      cur = null;
+      continue;
+    }
+    if (cur) cur.parts.push(line);
   }
+
+  const drafts: PdfDraft[] = blocks
+    .map((b) => ({
+      date: b.date,
+      description: buildDescription(b.parts),
+      amount: b.amount,
+    }))
+    .filter((d) => d.description.length >= 2);
 
   // Amostra das primeiras linhas para diagnóstico quando nada é reconhecido.
   const sample = lines.filter((l) => l.trim().length > 0).slice(0, 12);
