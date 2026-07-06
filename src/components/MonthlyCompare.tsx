@@ -11,6 +11,7 @@ import {
   Cell,
 } from "recharts";
 import { BRL } from "@/lib/categories";
+import { PanelHeader } from "@/components/PanelHeader";
 
 interface Props {
   data: { month: string; label: string; total: number }[];
@@ -24,10 +25,12 @@ export function MonthlyCompare({ data, selectedMonth }: Props) {
 
   return (
     <div className="glass p-5">
-      <h3 className="mb-1 font-semibold">Comparativo mensal</h3>
-      <p className="text-dim mb-4 text-xs">
-        Total de gastos nos últimos {data.length} meses
-      </p>
+      <PanelHeader
+        icon="calendar"
+        color="#0a84ff"
+        title="Comparativo mensal"
+        subtitle={`Total de gastos nos últimos ${data.length} meses`}
+      />
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={data} margin={{ left: -18, right: 8, top: 4 }}>
           <defs>

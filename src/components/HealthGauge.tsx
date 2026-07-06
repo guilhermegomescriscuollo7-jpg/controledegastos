@@ -92,8 +92,8 @@ export function HealthGauge({ health }: { health: HealthScore }) {
             x="100"
             y="92"
             textAnchor="middle"
-            className="fill-[var(--text)]"
-            style={{ fontSize: 34, fontWeight: 700 }}
+            fill={color}
+            style={{ fontSize: 36, fontWeight: 700, letterSpacing: "-0.02em" }}
           >
             {shown}
           </text>

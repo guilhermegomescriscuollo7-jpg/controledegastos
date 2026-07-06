@@ -1,4 +1,5 @@
 import { BRL } from "@/lib/categories";
+import { PanelHeader } from "@/components/PanelHeader";
 
 const COLORS = ["#7c5cff", "#38bdf8", "#34d399", "#fbbf24", "#fb7185"];
 
@@ -11,10 +12,12 @@ export function AccountSplit({ data }: Props) {
 
   return (
     <div className="glass p-5">
-      <h3 className="mb-1 font-semibold">Gastos por conta</h3>
-      <p className="text-dim mb-4 text-xs">
-        De onde saiu o dinheiro neste mês
-      </p>
+      <PanelHeader
+        icon="card"
+        color="#7c5cff"
+        title="Gastos por conta"
+        subtitle="De onde saiu o dinheiro neste mês"
+      />
       <ul className="space-y-3">
         {data.map((d, i) => {
           const color = COLORS[i % COLORS.length];

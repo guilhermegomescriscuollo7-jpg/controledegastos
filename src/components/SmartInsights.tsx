@@ -130,14 +130,18 @@ function buildInsights({
     });
   }
 
-  // Maior gasto individual
+  // Maior gasto individual (descrição encurtada para não estourar a linha)
   if (topExpense) {
+    const desc =
+      topExpense.description.length > 42
+        ? topExpense.description.slice(0, 41).trimEnd() + "…"
+        : topExpense.description;
     out.push({
       icon: "sparkles",
       tone: "info",
       text: (
         <>
-          Maior gasto: <strong>{topExpense.description}</strong> (
+          Maior gasto: <strong>{desc}</strong> (
           {BRL.format(Math.abs(topExpense.amount))}).
         </>
       ),

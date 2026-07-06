@@ -10,6 +10,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { BRL } from "@/lib/categories";
+import { PanelHeader } from "@/components/PanelHeader";
 
 interface Props {
   data: { label: string; total: number }[];
@@ -20,10 +21,12 @@ export function WeekdayChart({ data }: Props) {
 
   return (
     <div className="glass p-5">
-      <h3 className="mb-1 font-semibold">Gasto por dia da semana</h3>
-      <p className="text-dim mb-4 text-xs">
-        Em quais dias o dinheiro mais escapa neste mês
-      </p>
+      <PanelHeader
+        icon="calendar"
+        color="#5e5ce6"
+        title="Gasto por dia da semana"
+        subtitle="Em quais dias o dinheiro mais escapa neste mês"
+      />
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={data} margin={{ left: -18, right: 8, top: 4 }}>
           <defs>

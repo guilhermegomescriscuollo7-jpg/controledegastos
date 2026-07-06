@@ -102,7 +102,7 @@ export function TransactionManager({
   }
 
   return (
-    <div className="glass p-2 sm:p-3">
+    <div className="glass no-lift p-2 sm:p-3">
       {/* Busca, filtro e exportação */}
       <div className="flex flex-wrap items-center gap-2 px-2 pb-2 pt-1">
         <div className="relative min-w-[160px] flex-1">
@@ -204,7 +204,7 @@ export function TransactionManager({
           return (
             <li
               key={t.id}
-              className="group flex items-center gap-3 px-2 py-3"
+              className="row-hover group flex items-center gap-3 px-2 py-3"
             >
               <span
                 className="grid h-10 w-10 shrink-0 place-items-center rounded-full"
@@ -272,7 +272,7 @@ export function TransactionManager({
             onClick={() => setConfirmId(null)}
           >
             <div
-              className="glass animate-fadeup w-full max-w-xs p-5 text-center"
+              className="glass no-lift animate-fadeup w-full max-w-xs p-5 text-center"
               style={{ background: "var(--popover-bg)" }}
               onClick={(e) => e.stopPropagation()}
             >

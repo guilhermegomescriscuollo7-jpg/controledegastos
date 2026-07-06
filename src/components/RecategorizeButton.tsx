@@ -134,7 +134,7 @@ export function RecategorizeButton({
             onClick={() => setConfirm(false)}
           >
             <div
-              className="glass animate-fadeup w-full max-w-xs p-5 text-center"
+              className="glass no-lift animate-fadeup w-full max-w-xs p-5 text-center"
               style={{ background: "var(--popover-bg)" }}
               onClick={(e) => e.stopPropagation()}
             >

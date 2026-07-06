@@ -32,10 +32,18 @@ export function NavBar() {
             <Link
               key={it.href}
               href={it.href}
-              className={`flex min-w-[64px] flex-col items-center gap-0.5 rounded-full px-3 py-1.5 text-[11px] font-medium transition ${
-                active ? "text-white" : "link-dim"
+              className={`flex min-w-[64px] flex-col items-center gap-0.5 rounded-full px-3 py-1.5 text-[11px] font-medium transition-all ${
+                active ? "text-white" : "link-dim hover:text-[color:var(--text)]"
               }`}
-              style={active ? { background: "var(--accent)" } : undefined}
+              style={
+                active
+                  ? {
+                      background: "var(--accent)",
+                      boxShadow:
+                        "0 4px 16px -4px color-mix(in srgb, var(--accent) 75%, transparent)",
+                    }
+                  : undefined
+              }
             >
               <Icon name={it.icon} size={19} strokeWidth={active ? 2 : 1.7} />
               {it.label}

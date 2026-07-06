@@ -23,7 +23,7 @@ export function DashboardTabs({ tabs }: { tabs: DashTab[] }) {
       <div
         role="tablist"
         aria-label="Seções do painel"
-        className="glass relative flex p-1"
+        className="glass no-lift relative flex p-1"
         style={{ borderRadius: 9999 }}
       >
         {/* indicador que desliza para a aba ativa */}

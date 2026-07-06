@@ -1,5 +1,6 @@
 import { categoryMeta, BRL } from "@/lib/categories";
 import { CategoryIcon } from "@/components/icons";
+import { PanelHeader } from "@/components/PanelHeader";
 import type { Transaction } from "@/lib/types";
 
 function fmtDate(iso: string) {
@@ -12,10 +13,12 @@ export function TopExpenses({ transactions }: { transactions: Transaction[] }) {
 
   return (
     <div className="glass p-5">
-      <h3 className="mb-1 font-semibold">Maiores gastos do mês</h3>
-      <p className="text-dim mb-4 text-xs">
-        Os {transactions.length} lançamentos que mais pesaram
-      </p>
+      <PanelHeader
+        icon="arrow-down"
+        color="#ff375f"
+        title="Maiores gastos do mês"
+        subtitle={`Os ${transactions.length} lançamentos que mais pesaram`}
+      />
       <ul className="space-y-2.5">
         {transactions.map((t, i) => {
           const meta = categoryMeta(t.category);

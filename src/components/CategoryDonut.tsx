@@ -3,6 +3,7 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { categoryMeta, BRL } from "@/lib/categories";
 import { CategoryIcon } from "@/components/icons";
+import { PanelHeader } from "@/components/PanelHeader";
 import type { CategoryKey } from "@/lib/types";
 
 interface Props {
@@ -20,8 +21,12 @@ export function CategoryDonut({ data }: Props) {
 
   return (
     <div className="glass p-5">
-      <h3 className="mb-1 font-semibold">Para onde vai o dinheiro</h3>
-      <p className="text-dim mb-4 text-xs">Gastos do mês por categoria</p>
+      <PanelHeader
+        icon="wallet"
+        color="#bf5af2"
+        title="Para onde vai o dinheiro"
+        subtitle="Gastos do mês por categoria"
+      />
       <div className="flex flex-col items-center gap-4 sm:flex-row">
         <div className="relative h-[190px] w-[190px] shrink-0">
           <ResponsiveContainer width="100%" height="100%">

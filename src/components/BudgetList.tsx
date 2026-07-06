@@ -1,15 +1,18 @@
 import { categoryMeta, BRL } from "@/lib/categories";
 import { CategoryIcon } from "@/components/icons";
+import { PanelHeader } from "@/components/PanelHeader";
 import type { FinanceSummary } from "@/lib/finance";
 
 export function BudgetList({ status }: { status: FinanceSummary["budgetStatus"] }) {
   const sorted = [...status].sort((a, b) => b.pct - a.pct);
   return (
     <div className="glass p-5">
-      <h3 className="mb-1 font-semibold">Limites por categoria</h3>
-      <p className="text-dim mb-4 text-xs">
-        Barras vermelhas = você passou do limite do mês
-      </p>
+      <PanelHeader
+        icon="target"
+        color="#ff9f0a"
+        title="Limites por categoria"
+        subtitle="Barras vermelhas = você passou do limite do mês"
+      />
       <ul className="space-y-4">
         {sorted.map((b) => {
           const meta = categoryMeta(b.category);
