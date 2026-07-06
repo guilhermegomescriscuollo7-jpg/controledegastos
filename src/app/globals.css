@@ -33,10 +33,11 @@
   --tint: rgba(10, 132, 255, 0.06);
 
   /* Aurora do fundo */
-  --aurora-1: rgba(124, 92, 255, 0.35);
-  --aurora-2: rgba(10, 132, 255, 0.28);
-  --aurora-3: rgba(56, 189, 248, 0.18);
-  --aurora-opacity: 0.55;
+  --aurora-1: rgba(124, 92, 255, 0.55);
+  --aurora-2: rgba(10, 132, 255, 0.5);
+  --aurora-3: rgba(56, 189, 248, 0.42);
+  --aurora-opacity: 0.9;
+  --aurora-blur: 70px;
   /* Brilho superior dos cards de vidro */
   --card-sheen: rgba(255, 255, 255, 0.06);
 }
@@ -71,10 +72,11 @@
   --tint: rgba(0, 113, 227, 0.05);
 
   /* Aurora do fundo (bem suave no claro) */
-  --aurora-1: rgba(124, 92, 255, 0.16);
-  --aurora-2: rgba(10, 132, 255, 0.14);
-  --aurora-3: rgba(56, 189, 248, 0.1);
-  --aurora-opacity: 0.7;
+  --aurora-1: rgba(124, 92, 255, 0.22);
+  --aurora-2: rgba(10, 132, 255, 0.2);
+  --aurora-3: rgba(56, 189, 248, 0.16);
+  --aurora-opacity: 0.85;
+  --aurora-blur: 80px;
   --card-sheen: rgba(255, 255, 255, 0.5);
 }
 
@@ -112,7 +114,13 @@ body {
   inset: 0;
   z-index: -1;
   overflow: hidden;
-  background: var(--bg-base);
+  /* brilho ambiente no topo + base sólida */
+  background: radial-gradient(
+      90% 55% at 50% -8%,
+      color-mix(in srgb, var(--accent) 22%, transparent),
+      transparent 60%
+    ),
+    var(--bg-base);
 }
 .app-bg::before,
 .app-bg::after,
@@ -120,7 +128,7 @@ body {
   content: "";
   position: absolute;
   border-radius: 50%;
-  filter: blur(90px);
+  filter: blur(var(--aurora-blur));
   opacity: var(--aurora-opacity);
   will-change: transform;
 }

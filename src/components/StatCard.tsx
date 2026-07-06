@@ -12,11 +12,19 @@ interface Props {
 export function StatCard({ label, value, accent = "var(--accent)", sub, icon }: Props) {
   return (
     <div className="glass relative overflow-hidden p-5">
-      {/* halo suave na cor do card */}
+      {/* vidro tingido na cor do card */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full opacity-70 blur-2xl"
-        style={{ background: `radial-gradient(circle, ${accent}, transparent 70%)` }}
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: `linear-gradient(150deg, color-mix(in srgb, ${accent} 12%, transparent), transparent 60%)`,
+        }}
+      />
+      {/* halo na cor do card */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-5 -top-8 h-24 w-24 rounded-full opacity-90 blur-2xl"
+        style={{ background: `radial-gradient(circle, color-mix(in srgb, ${accent} 55%, transparent), transparent 70%)` }}
       />
       <div className="relative flex items-center justify-between">
         <span className="text-dim text-[11px] font-medium uppercase tracking-wide">
