@@ -33,11 +33,11 @@
   --tint: rgba(10, 132, 255, 0.06);
 
   /* Aurora do fundo */
-  --aurora-1: rgba(124, 92, 255, 0.55);
-  --aurora-2: rgba(10, 132, 255, 0.5);
-  --aurora-3: rgba(56, 189, 248, 0.42);
-  --aurora-opacity: 0.9;
-  --aurora-blur: 70px;
+  --aurora-1: rgba(124, 92, 255, 0.5);
+  --aurora-2: rgba(10, 132, 255, 0.45);
+  --aurora-3: rgba(56, 189, 248, 0.38);
+  --aurora-opacity: 0.72;
+  --aurora-blur: 75px;
   /* Brilho superior dos cards de vidro */
   --card-sheen: rgba(255, 255, 255, 0.06);
 }
@@ -89,12 +89,20 @@ body {
   padding: 0;
   margin: 0;
   color: var(--text);
-  background: var(--bg-base);
   font-family: "SF Pro Display", "SF Pro Text", -apple-system,
     BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  transition: background-color 0.4s ease, color 0.4s ease;
+  transition: color 0.4s ease;
+}
+/* Cor-base só no html: o body precisa ficar transparente para a aurora
+   (camada .app-bg com z-index:-1) aparecer atrás do conteúdo. */
+html {
+  background: var(--bg-base);
+  transition: background-color 0.4s ease;
+}
+body {
+  background: transparent;
 }
 
 /* Tipografia estilo Apple: títulos com tracking negativo */
