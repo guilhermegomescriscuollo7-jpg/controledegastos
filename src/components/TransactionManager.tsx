@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { categoryMeta, BRL, EXPENSE_CATEGORIES, CATEGORIES } from "@/lib/categories";
@@ -10,6 +11,15 @@ import type { Transaction, CategoryKey } from "@/lib/types";
 function fmtDate(iso: string) {
   const [, mm, dd] = iso.split("-");
   return `${dd}/${mm}`;
+}
+
+const MESES_LONGO = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+];
+function fmtMonth(key: string) {
+  const [y, m] = key.split("-");
+  return `${MESES_LONGO[Number(m) - 1]} ${y}`;
 }
 
 function exportCsv(transactions: Transaction[]) {
@@ -52,10 +62,21 @@ export function TransactionManager({
   const [err, setErr] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState<CategoryKey | "todas">("todas");
+  const [monthFilter, setMonthFilter] = useState<string>("todos");
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  // Meses presentes nas transações (yyyy-mm), do mais recente ao mais antigo.
+  const months = useMemo(() => {
+    const set = new Set<string>();
+    for (const t of transactions) set.add(t.date.slice(0, 7));
+    return [...set].sort((a, b) => b.localeCompare(a));
+  }, [transactions]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return transactions.filter((t) => {
+      if (monthFilter !== "todos" && !t.date.startsWith(monthFilter)) return false;
       if (catFilter !== "todas" && t.category !== catFilter) return false;
       if (!q) return true;
       return (
@@ -63,7 +84,7 @@ export function TransactionManager({
         (t.account ?? "").toLowerCase().includes(q)
       );
     });
-  }, [transactions, search, catFilter]);
+  }, [transactions, search, catFilter, monthFilter]);
 
   async function remove(id: string) {
     if (demo || !isSupabaseConfigured()) {
@@ -97,6 +118,23 @@ export function TransactionManager({
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+        {months.length > 1 && (
+          <select
+            className="input-glass w-auto py-2 text-sm"
+            value={monthFilter}
+            onChange={(e) => setMonthFilter(e.target.value)}
+            aria-label="Filtrar por mês"
+          >
+            <option value="todos" className="bg-[var(--select-bg)] text-[color:var(--text)]">
+              Todos os meses
+            </option>
+            {months.map((mk) => (
+              <option key={mk} value={mk} className="bg-[var(--select-bg)] text-[color:var(--text)]">
+                {fmtMonth(mk)}
+              </option>
+            ))}
+          </select>
+        )}
         <select
           className="input-glass w-auto py-2 text-sm"
           value={catFilter}
@@ -123,6 +161,20 @@ export function TransactionManager({
           <Icon name="file" size={15} /> Exportar CSV
         </button>
       </div>
+
+      {(monthFilter !== "todos" || catFilter !== "todas" || search.trim()) && (
+        <p className="text-dim px-3 pb-1 pt-0.5 text-xs">
+          {filtered.length} lançamento{filtered.length !== 1 ? "s" : ""}
+          {" · "}
+          <span className="text-accent-red">
+            gastos {BRL.format(filtered.reduce((s, t) => (t.amount < 0 ? s + Math.abs(t.amount) : s), 0))}
+          </span>
+          {" · "}
+          <span className="text-accent-green">
+            receitas {BRL.format(filtered.reduce((s, t) => (t.amount > 0 ? s + t.amount : s), 0))}
+          </span>
+        </p>
+      )}
 
       {err && (
         <p className="px-3 py-2 text-sm text-accent-red">{err}</p>
@@ -211,41 +263,45 @@ export function TransactionManager({
         )}
       </ul>
 
-      {/* Confirmação de exclusão */}
-      {confirmId && (
-        <div
-          className="fixed inset-0 z-[60] grid place-items-center bg-black/40 p-4"
-          onClick={() => setConfirmId(null)}
-        >
+      {/* Confirmação de exclusão (portal para não ficar preso no .page-enter) */}
+      {confirmId &&
+        mounted &&
+        createPortal(
           <div
-            className="glass animate-fadeup w-full max-w-xs p-5 text-center"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[80] grid place-items-center bg-black/50 p-4"
+            onClick={() => setConfirmId(null)}
           >
-            <div className="mx-auto mb-3 grid h-11 w-11 place-items-center rounded-full bg-accent-red/15 text-accent-red">
-              <Icon name="trash" size={20} />
+            <div
+              className="glass animate-fadeup w-full max-w-xs p-5 text-center"
+              style={{ background: "var(--popover-bg)" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mx-auto mb-3 grid h-11 w-11 place-items-center rounded-full bg-accent-red/15 text-accent-red">
+                <Icon name="trash" size={20} />
+              </div>
+              <h3 className="font-semibold">Excluir transação?</h3>
+              <p className="text-dim mt-1 text-sm">
+                Essa ação não pode ser desfeita.
+              </p>
+              <div className="mt-4 flex gap-2">
+                <button
+                  className="btn-glass flex-1"
+                  onClick={() => setConfirmId(null)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="flex-1 rounded-full bg-accent-red px-5 py-2.5 text-sm font-medium text-white transition hover:brightness-110 disabled:opacity-60"
+                  onClick={() => remove(confirmId)}
+                  disabled={busy}
+                >
+                  {busy ? "Excluindo…" : "Excluir"}
+                </button>
+              </div>
             </div>
-            <h3 className="font-semibold">Excluir transação?</h3>
-            <p className="text-dim mt-1 text-sm">
-              Essa ação não pode ser desfeita.
-            </p>
-            <div className="mt-4 flex gap-2">
-              <button
-                className="btn-glass flex-1"
-                onClick={() => setConfirmId(null)}
-              >
-                Cancelar
-              </button>
-              <button
-                className="flex-1 rounded-full bg-accent-red px-5 py-2.5 text-sm font-medium text-white transition hover:brightness-110 disabled:opacity-60"
-                onClick={() => remove(confirmId)}
-                disabled={busy}
-              >
-                {busy ? "Excluindo…" : "Excluir"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
